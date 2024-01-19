@@ -242,3 +242,12 @@ app_example/
 ```
 
 In order to not bloat the single file with every test type.
+
+# Import ordering
+
+The order of imports are done from the dependency `isort`. From the commandline this can be done using the command
+
+`isort .`
+
+This is slightly inefficient as it runs it over all files, however, the repository is not large enough to really
+take in the effort to only scan the committed files.
