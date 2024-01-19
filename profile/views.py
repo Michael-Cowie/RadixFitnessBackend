@@ -7,9 +7,9 @@ from .models import Profile
 from .serializers import ProfileSerializer
 
 
-def _get_profile(uid):
+def _get_profile_for_user(user):
     try:
-        return Profile.objects.get(uid=uid)
+        return Profile.objects.get(user_id=user)
     except Profile.DoesNotExist:
         raise Http404
 
@@ -20,7 +20,7 @@ class ProfileView(APIView):
         """
         Create a UserProfile and add it to the database.
         """
-        data = request.data | {'uid': request.user.username}
+        data = request.data | {'user_id': request.user.id}
         serializer = ProfileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -31,7 +31,7 @@ class ProfileView(APIView):
         """
         Get a UserProfile.
         """
-        user_profile = _get_profile(request.user.username)
+        user_profile = _get_profile_for_user(request.user)
         serializer = ProfileSerializer(user_profile)
         return Response(serializer.data)
 
@@ -39,17 +39,17 @@ class ProfileView(APIView):
         """
         Updates an existing UserProfile from the provided request data.
         """
-        user_profile = _get_profile(request.user.username)
-        serializer = ProfileSerializer(user_profile, data=request.data)
+        user_profile = _get_profile_for_user(request.user)
+        serializer = ProfileSerializer(user_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
         """
         Delete a UserProfile.
         """
-        user_profile = _get_profile(request.user.username)
+        user_profile = _get_profile_for_user(request.user)
         user_profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

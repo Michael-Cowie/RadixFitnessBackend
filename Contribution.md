@@ -178,6 +178,11 @@ class YourTestClass(TestCase):
     def tearDown(self):
         # Clean up run after every test method.
         pass
+    
+    @classmethod
+    def setUpTestData(cls):
+        # Will be only ran once, to create reusable test data.
+        pass
 
     def test_something_that_will_pass(self):
         self.assertFalse(False)

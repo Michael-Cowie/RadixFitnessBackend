@@ -1,3 +1,11 @@
+# Django database
+db.sqlite3
+
+# PyCharm virtual environment
 venv
+
+# Intellij configurations
 .idea
+
+# dotenv file
 .env

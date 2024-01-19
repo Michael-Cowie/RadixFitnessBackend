@@ -22,8 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Weight Tracking
-    path('measurements/weights/', include('weights.urls')),
+    path('api/v1/measurements/weights/', include('weights.urls')),
 
     # Profile Route
-    path('api/profile/', include('profile.urls'))
+    path('api/v1/profile/', include('profile.urls'))
 ]
