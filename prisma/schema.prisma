@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Profile {
+  id           Int            @id @default(autoincrement())
+  uid          String
+  name         String
+  WeightRecord WeightRecord[]
+  firebaseUIDs FirebaseUID[]
+}
+
+model FirebaseUID {
+  id Int @id @default(autoincrement())
+  firebase_uid String
+  user Profile @relation(fields: [id], references: [id])
+}
+
+model WeightRecord {
+  id      Int     @id @default(autoincrement())
+  weight  Decimal
+  date    DateTime
+  owner   Profile @relation(fields: [ownerId], references: [id])
+  ownerId Int // relation scalar
+}
