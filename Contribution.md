@@ -251,3 +251,7 @@ The order of imports are done from the dependency `isort`. From the commandline 
 
 This is slightly inefficient as it runs it over all files, however, the repository is not large enough to really
 take in the effort to only scan the committed files.
+
+# API Documentation
+
+API documentation is done by using `drf-yasg` and is accessible using `http://.../swagger/`.

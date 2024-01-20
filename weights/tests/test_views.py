@@ -99,6 +99,7 @@ class WeightsViewTest(WeightsTest):
     def test_creating_a_weight(self):
         # 1. Send a POST to create the weight
         response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.data
         response_id = response_data['id']
 
@@ -139,6 +140,27 @@ class WeightsViewTest(WeightsTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(new_weight, int(model_weight.weight))
         self.assertEqual(new_unit, model_weight.unit)
+
+    def test_partially_updating_a_weight(self):
+        # 1. Send a POST to create the weight
+        self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+
+        # 2. Send a PATCH to update only the weight
+        new_weight = 200
+        new_data = json.dumps({
+            'date': self.date,
+            'weight': new_weight
+        })
+
+        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
+
+        # 3. Verify that the weight has been updated in the model and the unit remains unchanged
+        weight_id = response.data['id']
+        model_weight = Weights.objects.get(id=weight_id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(new_weight, int(model_weight.weight))
+        self.assertEqual(self.unit, model_weight.unit)
 
     def test_deleting_a_weight(self):
         # 1. Send a POST to create the weight
