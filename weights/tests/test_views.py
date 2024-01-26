@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models import Units, Weights
+from ..models import Weights
 
 
 class WeightsTest(TestCase):
@@ -26,22 +26,21 @@ class WeightsTest(TestCase):
     def setUpTestData(cls):
         user = User.objects.create(id=1, username='Test User')
 
-        def _create_weight_tracking_entry(date, weight, unit):
+        def _create_weight_tracking_entry(date, weight):
             return Weights.objects.create(
                 date=date,
-                weight=weight,
-                unit=unit,
+                weight_kg=weight,
                 user_id=user
             )
 
-        _create_weight_tracking_entry('2024-01-01', 70, Units.KILOGRAM)
-        _create_weight_tracking_entry('2024-01-08', 71, Units.KILOGRAM)
-        _create_weight_tracking_entry('2024-01-13', 72, Units.KILOGRAM)
-        _create_weight_tracking_entry('2024-01-20', 73, Units.KILOGRAM)
-        _create_weight_tracking_entry('2024-01-27', 74, Units.KILOGRAM)
-        _create_weight_tracking_entry('2024-02-01', 163, Units.POUND)
-        _create_weight_tracking_entry('2024-02-08', 167.5, Units.POUND)
-        _create_weight_tracking_entry('2024-02-15', 171.33, Units.POUND)
+        _create_weight_tracking_entry('2024-01-01', 70)
+        _create_weight_tracking_entry('2024-01-08', 71)
+        _create_weight_tracking_entry('2024-01-13', 72)
+        _create_weight_tracking_entry('2024-01-20', 73)
+        _create_weight_tracking_entry('2024-01-27', 74)
+        _create_weight_tracking_entry('2024-02-01', 163)
+        _create_weight_tracking_entry('2024-02-08', 167.5)
+        _create_weight_tracking_entry('2024-02-15', 171.33)
 
 
 class AllWeightsView(WeightsTest):
@@ -58,8 +57,7 @@ class AllWeightsView(WeightsTest):
         for weight in self.data:
             expected_weight = Weights.objects.get(id=weight['id'])
             self.assertEqual(self.date_as_datetime(weight['date']), expected_weight.date)
-            self.assertEqual(weight['weight'], str(expected_weight.weight))
-            self.assertEqual(weight['unit'], expected_weight.unit)
+            self.assertEqual(weight['weight_kg'], str(expected_weight.weight_kg))
             self.assertEqual(weight['user_id'], expected_weight.user_id.id)
 
     def test_correct_number_of_expected_users(self):
@@ -89,11 +87,9 @@ class WeightsViewTest(WeightsTest):
 
         self.date = '2000-01-01'
         self.weight = '200.00'
-        self.unit = 'kg'
         self.data = json.dumps({
             'date': self.date,
-            'weight': self.weight,
-            'unit': self.unit
+            'weight_kg': self.weight
         })
 
     def test_creating_a_weight(self):
@@ -107,8 +103,7 @@ class WeightsViewTest(WeightsTest):
         created_weight = Weights.objects.get(id=response_id)
 
         self.assertEqual(self.date_as_datetime(self.date), created_weight.date)
-        self.assertEqual(self.weight, str(created_weight.weight))
-        self.assertEqual(self.unit, created_weight.unit)
+        self.assertEqual(self.weight, str(created_weight.weight_kg))
         self.assertEqual(self.user, created_weight.user_id)
 
     def test_creating_two_weights_same_day(self):
@@ -125,11 +120,9 @@ class WeightsViewTest(WeightsTest):
 
         # 2. Send a PATCH to update the weight and unit
         new_weight = 200
-        new_unit = 'lbs'
         new_data = json.dumps({
             'date': self.date,
-            'weight': new_weight,
-            'unit': new_unit
+            'weight_kg': new_weight
         })
         response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
 
@@ -138,8 +131,7 @@ class WeightsViewTest(WeightsTest):
         model_weight = Weights.objects.get(id=weight_id)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(new_weight, int(model_weight.weight))
-        self.assertEqual(new_unit, model_weight.unit)
+        self.assertEqual(new_weight, int(model_weight.weight_kg))
 
     def test_partially_updating_a_weight(self):
         # 1. Send a POST to create the weight
@@ -149,7 +141,7 @@ class WeightsViewTest(WeightsTest):
         new_weight = 200
         new_data = json.dumps({
             'date': self.date,
-            'weight': new_weight
+            'weight_kg': new_weight
         })
 
         response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
@@ -159,8 +151,7 @@ class WeightsViewTest(WeightsTest):
         model_weight = Weights.objects.get(id=weight_id)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(new_weight, int(model_weight.weight))
-        self.assertEqual(self.unit, model_weight.unit)
+        self.assertEqual(new_weight, int(model_weight.weight_kg))
 
     def test_deleting_a_weight(self):
         # 1. Send a POST to create the weight

@@ -39,6 +39,8 @@ class WeightsView(APIView):
     def post(self, request):
         """
         Create a weight entry for a particular date.
+
+        The unit of measurement used for all weights is kilograms.
         """
         request_serializer = WeightTrackingRequest(data=request.data)
         if request_serializer.is_valid():
@@ -67,10 +69,7 @@ class WeightsView(APIView):
         updated_data = {}
 
         if updated_weight := request.data.get('weight'):
-            updated_data['weight'] = updated_weight
-
-        if updated_unit := request.data.get('unit'):
-            updated_data['unit'] = updated_unit
+            updated_data['weight_kg'] = updated_weight
 
         request_serializer = WeightTrackingRequest(weight, data=updated_data, partial=True)
         if request_serializer.is_valid():
