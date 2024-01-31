@@ -78,6 +78,40 @@ class AllWeightsView(WeightsTest):
         data = self.client.get(self.test_url).data
         self.assertEqual(len(data), 0)
 
+    def test_dates_return_in_descending_order(self):
+        """
+        Verify that the weights are returned in descending order where the most recent date will be at index 0.
+        """
+        new_user = User.objects.create(id=2, username='new user username')
+        self.client.force_authenticate(user=new_user)
+
+        def _create_weight_tracking_entry(date, weight):
+            return Weights.objects.create(
+                date=date,
+                weight_kg=weight,
+                user_id=new_user
+            )
+
+        expected_list = [
+            '2024-12-25',
+            '2024-12-20',
+            '2024-09-17',
+            '2024-08-16',
+            '2024-05-01',
+            '2024-01-02',
+            '2024-01-01',
+            '2023-12-25',
+            '2023-05-18',
+        ]
+
+        for position in [8, 3, 2, 7,  0, 4, 1, 5, 6]:  # Add to database in a random order.
+            _create_weight_tracking_entry(expected_list[position], 50 + position)
+
+        returned_data = self.client.get(self.test_url).data
+
+        for expected_position in range(len(returned_data)):
+            self.assertEqual(returned_data[expected_position]['date'], expected_list[expected_position])
+
 
 class WeightsViewTest(WeightsTest):
 
@@ -119,7 +153,7 @@ class WeightsViewTest(WeightsTest):
         self.client.post(self.test_url, data=self.data, content_type=self.content_type)
 
         # 2. Send a PATCH to update the weight and unit
-        new_weight = 200
+        new_weight = 230
         new_data = json.dumps({
             'date': self.date,
             'weight_kg': new_weight
@@ -138,7 +172,7 @@ class WeightsViewTest(WeightsTest):
         self.client.post(self.test_url, data=self.data, content_type=self.content_type)
 
         # 2. Send a PATCH to update only the weight
-        new_weight = 200
+        new_weight = 999
         new_data = json.dumps({
             'date': self.date,
             'weight_kg': new_weight
@@ -165,3 +199,4 @@ class WeightsViewTest(WeightsTest):
         # 5. Verify that the weight has been deleted.
         with self.assertRaises(Weights.DoesNotExist):
             Weights.objects.get(id=weight_id)
+

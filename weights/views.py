@@ -64,11 +64,13 @@ class WeightsView(APIView):
     def patch(self, request):
         """
         Updates an existing weight for a particular date.
+
+        The unit of measurement used for all weights is kilograms.
         """
         weight = _get_weight_for_user_on_date(request.user, request.data['date'])
         updated_data = {}
 
-        if updated_weight := request.data.get('weight'):
+        if updated_weight := request.data.get('weight_kg'):
             updated_data['weight_kg'] = updated_weight
 
         request_serializer = WeightTrackingRequest(weight, data=updated_data, partial=True)
@@ -102,10 +104,15 @@ class AllWeightsView(APIView):
 
     def get(self, request):
         """
-        Returns all WeightTracking entries for the particular user.
+        Returns all recorded weight tracking entries for the logged-in user.
+
+        The order of weight tracking entries will be returned in descending order, so the most
+        recent date will be at index 0.
+
+        The unit of measurement used for all weights is kilograms.
         """
         res = []
         for weight in _get_all_weights_for_user(request.user):
             serializer = WeightTrackingResponse(weight)
             res.append(serializer.data)
-        return Response(res, status=status.HTTP_200_OK)
+        return Response(sorted(res, key=lambda x: x['date'], reverse=True), status=status.HTTP_200_OK)
