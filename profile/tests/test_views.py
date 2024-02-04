@@ -24,9 +24,11 @@ class ProfileViewTest(TestCase):
         self.content_type = 'application/json'
         self.test_url = reverse('profile')
 
+        self.default_unit = "Metric"
         self.data_name = "Michael"
         self.data = json.dumps({
-            "name": self.data_name
+            "name": self.data_name,
+            "preferred_unit": self.default_unit
         })
 
     def test_create_profile(self):
@@ -39,6 +41,7 @@ class ProfileViewTest(TestCase):
         # 2. Validate it was populated in the model with the correct data inside the http body
         created_profile = Profile.objects.get(id=profile_id)
         self.assertEqual(created_profile.name, self.data_name)
+        self.assertEqual(created_profile.preferred_unit, self.default_unit)
         self.assertEqual(created_profile.user_id, self.user)
 
     def test_creation_error_throws_error(self):
@@ -54,6 +57,7 @@ class ProfileViewTest(TestCase):
         test_name = "Michael"
         Profile.objects.create(
             name=test_name,
+            preferred_unit=self.default_unit,
             user_id=self.user
         )
 
@@ -63,10 +67,11 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.data['user_id'], self.user.id)
 
     def test_update_profile(self):
-        # 1. Create out test profile
+        # 1. Create our test profile
         test_name = "Michael"
         profile = Profile.objects.create(
             name=test_name,
+            preferred_unit=self.default_unit,
             user_id=self.user
         )
         self.assertEqual(profile.name, test_name)
@@ -83,11 +88,36 @@ class ProfileViewTest(TestCase):
         updated_profile = Profile.objects.get(id=profile_id)
         self.assertEqual(updated_profile.name, new_name)
 
+    def test_partially_updating_profile(self):
+        # 1. Create our test profile
+        test_name = "Michael"
+        test_preferred_unit = "Metric"
+        profile = Profile.objects.create(
+            name=test_name,
+            preferred_unit=test_preferred_unit,
+            user_id=self.user
+        )
+        self.assertEqual(profile.name, test_name)
+        self.assertEqual(profile.preferred_unit, test_preferred_unit)
+
+        # 2. Send a POST to update the preferred unit validate that it has updated
+        new_preferred_unit = "Imperial"
+        data = json.dumps({
+            "preferred_unit": new_preferred_unit
+        })
+        response = self.client.patch(self.test_url, data=data, content_type=self.content_type)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        profile_id = response.data['id']
+
+        updated_profile = Profile.objects.get(id=profile_id)
+        self.assertEqual(updated_profile.preferred_unit, new_preferred_unit)
+
     def test_deleting_profile(self):
         # 1. Create out test profile
         test_name = "Michael"
         Profile.objects.create(
             name=test_name,
+            preferred_unit=self.default_unit,
             user_id=self.user
         )
         self.assertEqual(Profile.objects.filter().count(), 1)

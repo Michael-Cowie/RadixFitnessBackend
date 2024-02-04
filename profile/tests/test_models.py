@@ -16,14 +16,17 @@ class ProfileModelTest(TestCase):
 
     def test_create_basic_profile(self):
         name = "Michael"
+        preferred_unit = "Metric"
 
         profile = Profile.objects.create(
             name=name,
+            preferred_unit=preferred_unit,
             user_id=self.user
         )
         profile.full_clean()
 
         self.assertEqual(profile.name, name)
+        self.assertEqual(profile.preferred_unit, preferred_unit)
         self.assertEqual(profile.user_id, self.user)
 
     def test_incorrect_name_type(self):
