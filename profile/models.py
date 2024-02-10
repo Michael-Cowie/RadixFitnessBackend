@@ -13,7 +13,7 @@ class Units(models.TextChoices):
 
 class Profile(models.Model):
     name = models.TextField(validators=[alpha])
-    preferred_unit = models.CharField(choices=Units.choices, max_length=8)
+    measurement_system = models.CharField(choices=Units.choices, max_length=8)
 
     user_id = models.OneToOneField(User, on_delete=models.CASCADE)
 

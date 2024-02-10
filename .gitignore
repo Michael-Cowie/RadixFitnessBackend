@@ -9,3 +9,6 @@ venv
 
 # dotenv file
 .env
+
+# Remove migration files, each clone of the repository should have a fresh database
+**/migrations/
