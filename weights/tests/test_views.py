@@ -187,6 +187,32 @@ class WeightsViewTest(WeightsTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(new_weight, int(model_weight.weight_kg))
 
+    def test_updating_notes(self):
+        # 1. Send a POST to create the weight
+        data = json.dumps({
+            'date': self.date,
+            'weight_kg': self.weight,
+            'notes': 'My initial notes'
+        })
+
+        self.client.post(self.test_url, data=data, content_type=self.content_type)
+
+        # 2. Send a PATCH to update only the notes
+        new_notes = "My new notes"
+        new_data = json.dumps({
+            'date': self.date,
+            'notes': new_notes
+        })
+
+        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
+
+        # 3. Verify that the notes has been updated in the model and the unit remains unchanged
+        weight_id = response.data['id']
+        model_weight = Weights.objects.get(id=weight_id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(new_notes, model_weight.notes)
+
     def test_deleting_a_weight(self):
         # 1. Send a POST to create the weight
         response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)

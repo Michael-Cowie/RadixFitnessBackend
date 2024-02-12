@@ -16,11 +16,12 @@ class WeightTrackingModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.get(id=1)
 
-    def _create_weight_tracking_entry(self, date, weight, user_id):
+    def _create_weight_tracking_entry(self, date, weight, user_id, notes=''):
         return Weights.objects.create(
             date=date,
             weight_kg=weight,
-            user_id=user_id
+            user_id=user_id,
+            notes=notes
         )
 
     def test_weight_tracking_model_creation(self):
@@ -100,4 +101,7 @@ class WeightTrackingModelTest(TestCase):
         for weight in Weights.objects.filter(user_id=self.user):
             self.assertIn(weight, created_weights)
 
-
+    def test_weight_tracking_with_notes(self):
+        notes = "Going well, keep it up!"
+        weight_entry = self._create_weight_tracking_entry('2024-01-01', 70, self.user, notes=notes)
+        self.assertEqual(weight_entry.notes, notes)

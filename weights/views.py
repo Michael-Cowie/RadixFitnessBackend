@@ -72,6 +72,8 @@ class WeightsView(APIView):
 
         if updated_weight := request.data.get('weight_kg'):
             updated_data['weight_kg'] = updated_weight
+        if updated_notes := request.data.get('notes'):
+            updated_data['notes'] = updated_notes
 
         request_serializer = WeightTrackingRequest(weight, data=updated_data, partial=True)
         if request_serializer.is_valid():
