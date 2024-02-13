@@ -9,7 +9,7 @@ class Weights(models.Model):
 
     date = models.DateField()
     weight_kg = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(1)])
-    notes = models.CharField(max_length=255, default='')
+    notes = models.CharField(max_length=255, default='', blank=True)
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
