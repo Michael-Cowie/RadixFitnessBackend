@@ -57,7 +57,7 @@ class AllWeightsView(WeightsTest):
         for weight in self.data:
             expected_weight = Weights.objects.get(id=weight['id'])
             self.assertEqual(self.date_as_datetime(weight['date']), expected_weight.date)
-            self.assertEqual(weight['weight_kg'], str(expected_weight.weight_kg))
+            self.assertEqual(weight['weight_kg'], expected_weight.weight_kg)
             self.assertEqual(weight['user_id'], expected_weight.user_id.id)
 
     def test_correct_number_of_expected_users(self):
@@ -120,7 +120,7 @@ class WeightsViewTest(WeightsTest):
         self.test_url = reverse('weights')
 
         self.date = '2000-01-01'
-        self.weight = '200.00'
+        self.weight = 200.00
         self.data = json.dumps({
             'date': self.date,
             'weight_kg': self.weight
@@ -137,7 +137,7 @@ class WeightsViewTest(WeightsTest):
         created_weight = Weights.objects.get(id=response_id)
 
         self.assertEqual(self.date_as_datetime(self.date), created_weight.date)
-        self.assertEqual(self.weight, str(created_weight.weight_kg))
+        self.assertEqual(self.weight, created_weight.weight_kg)
         self.assertEqual(self.user, created_weight.user_id)
 
     def test_creating_two_weights_same_day(self):

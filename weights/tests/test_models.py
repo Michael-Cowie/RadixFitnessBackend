@@ -76,18 +76,15 @@ class WeightTrackingModelTest(TestCase):
         self.assertIn(weight_1, queryset)
         self.assertNotIn(weight_2, queryset)
 
-    def test_weight_tracking_model_decimal_places(self):
-        # Try creating a WeightTracking instance with too many decimal places
-        with self.assertRaises(ValidationError):
-            invalid_weight = 70.555,  # Too many decimal places
-            weight = self._create_weight_tracking_entry('2024-01-06', invalid_weight, self.user)
-            weight.full_clean()
+    def test_conversion_between_units_precision(self):
+        kg_to_lbs = 2.2046226218488
+        user_input = 165
+        weight_kg = user_input / kg_to_lbs
 
-    def test_weight_tracking_too_many_max_digits(self):
-        with self.assertRaises(ValidationError):
-            invalid_weight = 70000.0,  # Too many max digits
-            weight = self._create_weight_tracking_entry('2024-01-06', invalid_weight, self.user)
-            weight.full_clean()
+        weight_entry = self._create_weight_tracking_entry('2024-01-01', weight_kg, self.user)
+
+        restored_user_weight = weight_entry.weight_kg * kg_to_lbs
+        self.assertEqual(user_input, restored_user_weight)
 
     def test_weight_tracking_all_dates_for_user(self):
         created_weights = [
