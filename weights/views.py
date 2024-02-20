@@ -5,9 +5,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Weights
-from .serializers import (WeightTrackingForDate, WeightTrackingNoContent,
-                          WeightTrackingRequest, WeightTrackingResponse)
+from .models import Weights, WeightGoal
+from .serializers import (WeightTrackingForDate, WeightTrackingNoContent, WeightGoalRequest,
+                          WeightTrackingRequest, WeightTrackingResponse, WeightGoalResponse)
 
 
 def _get_all_weights_for_user(user):
@@ -118,3 +118,78 @@ class AllWeightsView(APIView):
             serializer = WeightTrackingResponse(weight)
             res.append(serializer.data)
         return Response(sorted(res, key=lambda x: x['date'], reverse=True), status=status.HTTP_200_OK)
+
+
+class WeightGoalView(APIView):
+
+    def _get_model_entry(self, user):
+        try:
+            return WeightGoal.objects.get(user_id=user)
+        except WeightGoal.DoesNotExist:
+            raise Http404
+
+    @swagger_auto_schema(
+        request_body=WeightGoalRequest,
+        responses={
+            "201": openapi.Response(
+                description="Successfully created a goal weight",
+                schema=WeightTrackingResponse
+            ),
+            "400": "Invalid data to create goal weight"
+        }
+    )
+    def post(self, request):
+        """
+        Create a weight entry for a particular date.
+
+        The unit of measurement used for all weights is kilograms.
+        """
+        request_serializer = WeightGoalRequest(data=request.data)
+        if request_serializer.is_valid():
+            response_data = request.data | {'user_id': request.user.id}
+            response = WeightGoalResponse(data=response_data)
+            if response.is_valid():
+                response.save()
+                return Response(response.data, status=status.HTTP_201_CREATED)
+        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        """
+        Returns the users goal date in YYYY-MM-DD and the goal weight.
+
+        The unit of measurement used for all weights is kilograms.
+        """
+        model_entry = self._get_model_entry(request.user)
+        serializer = WeightGoalResponse(model_entry)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        request_body=WeightTrackingRequest,
+        responses={
+            "200": openapi.Response(
+                description="Successfully updated the weight",
+                schema=WeightTrackingResponse
+            ),
+            "400": "Invalid data to update a Weight entry"
+        }
+    )
+    def patch(self, request):
+        """
+        Updates an existing weight goal for a particular date.
+        """
+        existing_entry = self._get_model_entry(request.user)
+
+        updated_data = {}
+        if goal_date := request.data.get('goal_date'):
+            updated_data['goal_date'] = goal_date
+        if goal_weight_kg := request.data.get('goal_weight_kg'):
+            updated_data['goal_weight_kg'] = goal_weight_kg
+
+        request_serializer = WeightGoalRequest(existing_entry, data=updated_data, partial=True)
+        if request_serializer.is_valid():
+            response_data = updated_data | {'user_id': request.user.id}
+            response_serializer = WeightGoalResponse(existing_entry, data=response_data, partial=True)
+            if response_serializer.is_valid():
+                response_serializer.save()
+                return Response(response_serializer.data, status=status.HTTP_200_OK)
+        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

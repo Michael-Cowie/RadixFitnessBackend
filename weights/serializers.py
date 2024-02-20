@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Weights
+from .models import Weights, WeightGoal
 
 
 class WeightTrackingResponse(ModelSerializer):
@@ -25,3 +25,15 @@ class WeightTrackingNoContent(ModelSerializer):
     class Meta:
         model = Weights
         fields = ()
+
+
+class WeightGoalRequest(ModelSerializer):
+    class Meta:
+        model = WeightGoal
+        fields = ('goal_date', 'goal_weight_kg')
+
+
+class WeightGoalResponse(ModelSerializer):
+    class Meta:
+        model = WeightGoal
+        fields = ('id', 'goal_date', 'goal_weight_kg', 'user_id')
