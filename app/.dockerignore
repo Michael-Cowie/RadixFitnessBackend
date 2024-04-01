@@ -1,0 +1,6 @@
+venv
+static
+**/__pycache__
+.dockerignore
+Dockerfile
+images
