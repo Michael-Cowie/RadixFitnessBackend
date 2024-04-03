@@ -39,7 +39,7 @@ class WeightGoal(models.Model):
     goal_date = models.DateField()
     goal_weight_kg = models.FloatField(validators=[MinValueValidator(1)])
 
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'I want to be {self.goal_weight_kg} by {self.goal_date}'
