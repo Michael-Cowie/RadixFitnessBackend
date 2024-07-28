@@ -5,7 +5,10 @@ from django.db import models
 
 class Weights(models.Model):
     class Meta:
-        unique_together = ('date', 'user_id')  # Do not allow multiple weight entries for the same day.
+        unique_together = (
+            "date",
+            "user_id",
+        )  # Do not allow multiple weight entries for the same day.
 
     date = models.DateField()
     """
@@ -26,12 +29,12 @@ class Weights(models.Model):
     it to the user on the UI.
     """
     weight_kg = models.FloatField(validators=[MinValueValidator(1)])
-    notes = models.CharField(max_length=255, default='', blank=True)
+    notes = models.CharField(max_length=255, default="", blank=True)
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'On {self.date}, you weighed {self.weight_kg}kg'
+        return f"On {self.date}, you weighed {self.weight_kg}kg"
 
 
 class WeightGoal(models.Model):
@@ -42,4 +45,4 @@ class WeightGoal(models.Model):
     user_id = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'I want to be {self.goal_weight_kg} by {self.goal_date}'
+        return f"I want to be {self.goal_weight_kg} by {self.goal_date}"

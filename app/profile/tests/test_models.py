@@ -9,7 +9,7 @@ class ProfileModelTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        User.objects.create(id=1, username='Test User')
+        User.objects.create(id=1, username="Test User")
 
     def setUp(self):
         self.user = User.objects.get(id=1)
@@ -19,9 +19,7 @@ class ProfileModelTest(TestCase):
         measurement_system = "Metric"
 
         profile = Profile.objects.create(
-            name=name,
-            measurement_system=measurement_system,
-            user_id=self.user
+            name=name, measurement_system=measurement_system, user_id=self.user
         )
         profile.full_clean()
 
@@ -32,17 +30,11 @@ class ProfileModelTest(TestCase):
     def test_incorrect_name_type(self):
         name = "Invalid 123"
         with self.assertRaises(ValidationError):
-            profile = Profile.objects.create(
-                name=name,
-                user_id=self.user
-            )
+            profile = Profile.objects.create(name=name, user_id=self.user)
             profile.full_clean()
 
     def test_incorrect_name_length(self):
-        name = ''
+        name = ""
         with self.assertRaises(ValidationError):
-            profile = Profile.objects.create(
-                name=name,
-                user_id=self.user
-            )
+            profile = Profile.objects.create(name=name, user_id=self.user)
             profile.full_clean()

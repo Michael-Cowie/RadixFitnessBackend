@@ -9,17 +9,17 @@ from rest_framework.exceptions import AuthenticationFailed
 from .models import Firebase
 
 certificate = {
-    "type": os.getenv('FIREBASE_TYPE'),
-    "project_id": os.getenv('FIREBASE_PROJECT_ID'),
-    "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
-    "private_key": os.getenv('FIREBASE_PRIVATE_KEY').replace('\\n', '\n'),
-    "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
-    "client_id": os.getenv('FIREBASE_CLIENT_ID'),
-    "auth_uri": os.getenv('FIREBASE_AUTH_URI'),
-    "token_uri": os.getenv('FIREBASE_TOKEN_URI'),
-    "auth_provider_x509_cert_url": os.getenv('FIREBASE_AUTH_PROVIDER_X509_CERT_URL'),
-    "client_x509_cert_url": os.getenv('FIREBASE_CLIENT_X509_CERT_URL'),
-    "universe_domain": os.getenv('FIREBASE_UNIVERSE_DOMAIN')
+    "type": os.getenv("FIREBASE_TYPE"),
+    "project_id": os.getenv("FIREBASE_PROJECT_ID"),
+    "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
+    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+    "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
+    "client_id": os.getenv("FIREBASE_CLIENT_ID"),
+    "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
+    "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
+    "auth_provider_x509_cert_url": os.getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": os.getenv("FIREBASE_CLIENT_X509_CERT_URL"),
+    "universe_domain": os.getenv("FIREBASE_UNIVERSE_DOMAIN"),
 }
 
 cred = credentials.Certificate(certificate)
@@ -44,12 +44,12 @@ class FirebaseAuthentication(BaseAuthentication):
         The returned values will also set these attributes on the request object when forwarded, i.e.
         it can later be accessed via `request.user` and `request.uid` when forwarded to the Views.
         """
-        firebase_token = request.headers.get('Authorization')
+        firebase_token = request.headers.get("Authorization")
         if not firebase_token:
             return None
         try:
             decoded_token = auth.verify_id_token(firebase_token)
-            firebase_uid = decoded_token['uid']
+            firebase_uid = decoded_token["uid"]
 
             firebase_user_exists = Firebase.objects.filter(uid=firebase_uid).exists()
             if firebase_user_exists:
@@ -60,4 +60,4 @@ class FirebaseAuthentication(BaseAuthentication):
                 Firebase.objects.create(uid=firebase_uid, user_id=user)
             return user, firebase_uid
         except auth.InvalidIdTokenError:
-            raise AuthenticationFailed('Token authentication failed')
+            raise AuthenticationFailed("Token authentication failed")

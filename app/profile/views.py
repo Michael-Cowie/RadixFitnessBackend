@@ -23,10 +23,10 @@ class ProfileView(APIView):
         responses={
             "201": openapi.Response(
                 description="Successfully created a profile for the user",
-                schema=ProfileResponse
+                schema=ProfileResponse,
             ),
-            "400": "Unable to create profile"
-        }
+            "400": "Unable to create profile",
+        },
     )
     def post(self, request):
         """
@@ -34,11 +34,13 @@ class ProfileView(APIView):
         """
         request_serializer = ProfileRequest(data=request.data)
         if request_serializer.is_valid():
-            response_data = request.data | {'user_id': request.user.id}
+            response_data = request.data | {"user_id": request.user.id}
             response_serializer = ProfileResponse(data=response_data)
             if response_serializer.is_valid():
                 response_serializer.save()
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(
+                    response_serializer.data, status=status.HTTP_201_CREATED
+                )
         return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
@@ -54,19 +56,23 @@ class ProfileView(APIView):
         responses={
             "200": openapi.Response(
                 description="Successfully updated a profile for the user",
-                schema=ProfileResponse
+                schema=ProfileResponse,
             ),
-            "400": "Unable to update profile"
-        }
+            "400": "Unable to update profile",
+        },
     )
     def patch(self, request):
         """
         Updates an existing UserProfile from the provided request data.
         """
         user_profile = _get_profile_for_user(request.user)
-        request_serializer = ProfileRequest(user_profile, data=request.data, partial=True)
+        request_serializer = ProfileRequest(
+            user_profile, data=request.data, partial=True
+        )
         if request_serializer.is_valid():
-            response_serializer = ProfileResponse(user_profile, request.data, partial=True)
+            response_serializer = ProfileResponse(
+                user_profile, request.data, partial=True
+            )
             if response_serializer.is_valid():
                 response_serializer.save()
             return Response(response_serializer.data, status=status.HTTP_200_OK)
@@ -76,10 +82,9 @@ class ProfileView(APIView):
         request_body=ProfileNoContent,
         responses={
             "204": openapi.Response(
-                description="Successfully deleted the profile",
-                schema=ProfileNoContent
+                description="Successfully deleted the profile", schema=ProfileNoContent
             )
-        }
+        },
     )
     def delete(self, request):
         """

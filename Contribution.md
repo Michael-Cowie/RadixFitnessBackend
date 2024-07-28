@@ -243,14 +243,26 @@ app_example/
 
 In order to not bloat the single file with every test type.
 
-# Import ordering
+# Code Style
 
-The order of imports are done from the dependency `isort`. From the commandline this can be done using the command
+Black and isort are Python formatting tools that will are ran over the repository. Once a pull request has been made the
+GitHub Action workflow will run to make sure the code is an acceptable format before it can be merged. Any subsequent
+commits will also rerun the tests.
 
-`isort .`
+Due to the repository size, it's completely acceptable to resolve any formatting problems by running the scripts to 
+format the code over the entire repository. 
 
-This is slightly inefficient as it runs it over all files, however, the repository is not large enough to really
-take in the effort to only scan the committed files.
+To resolve isort formatting issues, run:
+
+```cmd
+isort .
+```
+
+To resolve Black formatting issues, run:
+
+```cmd
+black .
+```
 
 # API Documentation
 

@@ -6,13 +6,13 @@ from .models import Profile
 class ProfileResponse(ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('id', 'name', 'measurement_system', 'user_id')
+        fields = ("id", "name", "measurement_system", "user_id")
 
 
 class ProfileRequest(ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('name', 'measurement_system')
+        fields = ("name", "measurement_system")
 
 
 class ProfileNoContent(ModelSerializer):
