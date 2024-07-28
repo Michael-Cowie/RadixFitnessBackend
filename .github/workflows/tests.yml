@@ -4,8 +4,6 @@ on:
     paths:
       - '**.py'
   push:
-    paths:
-      - '**.py'
 jobs:
   Run-Tests:
     runs-on: ubuntu-20.04
