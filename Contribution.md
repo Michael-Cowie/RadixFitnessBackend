@@ -252,17 +252,7 @@ commits will also rerun the tests.
 Due to the repository size, it's completely acceptable to resolve any formatting problems by running the scripts to 
 format the code over the entire repository. 
 
-To resolve isort formatting issues, run:
-
-```cmd
-isort .
-```
-
-To resolve Black formatting issues, run:
-
-```cmd
-black .
-```
+To resolve all formatting issues, simply run `format_code.cmd` within the `app` directory.
 
 # API Documentation
 
