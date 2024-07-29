@@ -7,6 +7,9 @@ on:
 jobs:
   Run-Tests:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: app
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,6 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r ${{ github.workspace}}/app/requirements.txt
 
+      - name: Create .dev.env file
+        run: |
+          echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
+
       - name: Test isort
         run: python -m isort --check .
 
@@ -28,5 +35,4 @@ jobs:
         run: python -m black --check .
 
       - name: Test Django models
-        working-directory: app
         run: python manage.py test --parallel auto
