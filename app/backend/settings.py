@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Load the .dev.env file.
@@ -118,6 +119,16 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT"),
     }
 }
+
+"""
+When running test we do not want to connect to our database server. Instead, we want
+to run tests locally using SQLite3. This is because SQLite3 is acceptable for local
+development using low amounts of user data. This is ideal as it allows us to run 
+our tests without requiring a database server to be running as SQLite3 will create a 
+local database using the `db.sqlite3` file.
+"""
+if "test" in sys.argv:
+    DATABASES["default"] = {"ENGINE": "django.db.backends.sqlite3"}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

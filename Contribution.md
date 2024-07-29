@@ -163,7 +163,7 @@ django.setup()
 
 and also get the appropriate environment variable as the following in PyCharm,
 
-![test_environment_variable.png](images/test_environment_variable.png)
+![test_environment_variable.png](./app/images/test_environment_variable.png)
 
 # Test structure
 

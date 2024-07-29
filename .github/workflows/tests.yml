@@ -26,3 +26,7 @@ jobs:
 
       - name: Test Black
         run: python -m black --check .
+
+      - name: Test Django models
+        working-directory: app
+        run: python manage.py test --parallel auto

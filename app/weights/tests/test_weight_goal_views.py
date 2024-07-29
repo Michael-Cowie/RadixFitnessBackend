@@ -32,6 +32,14 @@ class WeightGoalTest(TestCase):
             goal_date="2025-01-01", goal_weight_kg=70, user_id=user
         )
 
+    def _change_user(self, user_id):
+        user = User.objects.create(
+            id=user_id, username=f"New Test User with id {user_id}"
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=user)
+
     def test_basic_response(self):
         response_data = self.client.get(self.test_url).data
 
@@ -42,6 +50,10 @@ class WeightGoalTest(TestCase):
         self.assertEqual(model_entry.goal_weight_kg, response_data["goal_weight_kg"])
 
     def test_basic_creation(self):
+        self._change_user(
+            user_id=2
+        )  # Change user as we already created a test weight in setUpTestData
+
         goal_date = "2025-01-01"
         goal_weight_kg = 70
         request_data = json.dumps(
