@@ -20,6 +20,9 @@ from dotenv import load_dotenv
 
 load_dotenv(join(dirname(__file__), ".dev.env"))
 
+with open(join(dirname(__file__), ".dev.env"), 'r') as f:
+    print(f.read())
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
