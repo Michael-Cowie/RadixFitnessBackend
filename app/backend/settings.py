@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 
 load_dotenv(join(dirname(__file__), ".dev.env"))
 
+print("INSIDE SETTING.py")
 with open(join(dirname(__file__), ".dev.env"), "r") as f:
     print(f.read())
 
