@@ -7,6 +7,9 @@ on:
 jobs:
   Run-Tests:
     runs-on: ubuntu-20.04
+    env:
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
     defaults:
       run:
         working-directory: app
@@ -26,14 +29,6 @@ jobs:
 
       - name: Create .dev.env file
         working-directory: app/backend
-        run: |
-          echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
-
-      - name: Create .dev.env file
-        run: |
-          echo ${{ secrets.DEV_DOT_ENV }} > .env
-
-      - name: Create .dev.env file
         run: |
           echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
 
