@@ -29,6 +29,14 @@ jobs:
         run: |
           echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
 
+      - name: Create .dev.env file
+        run: |
+          echo ${{ secrets.DEV_DOT_ENV }} > .env
+
+      - name: Create .dev.env file
+        run: |
+          echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
+
       - name: Test isort
         run: python -m isort --check .
 
