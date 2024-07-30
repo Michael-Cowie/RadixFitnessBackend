@@ -31,11 +31,8 @@ jobs:
           python -m pip install -r ${{ github.workspace}}/app/requirements.txt
 
       - name: Create .dev.env file
-        working-directory: app/backend
         run: |
           echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
-          pwd
-          dir -a
 
       - name: Test isort
         run: python -m isort --check .
