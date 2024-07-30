@@ -25,6 +25,7 @@ jobs:
           python -m pip install -r ${{ github.workspace}}/app/requirements.txt
 
       - name: Create .dev.env file
+        working-directory: app/backend
         run: |
           echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
 
@@ -35,4 +36,5 @@ jobs:
         run: python -m black --check .
 
       - name: Test Django models
+        working-directory: app
         run: python manage.py test --parallel auto

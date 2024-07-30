@@ -12,12 +12,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 import sys
+from os.path import dirname, join
 from pathlib import Path
 
 # Load the .dev.env file.
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(join(dirname(__file__), ".dev.env"))
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
