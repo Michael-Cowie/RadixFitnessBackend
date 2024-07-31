@@ -8,8 +8,8 @@ jobs:
   Run-Tests:
     runs-on: ubuntu-20.04
     env:
-      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
       DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
       FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY }}
       FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
       FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
@@ -28,11 +28,12 @@ jobs:
       - name: Setup Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r ${{ github.workspace}}/app/requirements.txt
+          python -m pip install -r requirements.txt
 
       - name: Create .dev.env file
+        working-directory: app/backend
         run: |
-          echo ${{ secrets.DEV_DOT_ENV }} > .dev.env
+          printf "${{ secrets.DEV_DOT_ENV }}" > .dev.env
 
       - name: Test isort
         run: python -m isort --check .
@@ -41,5 +42,4 @@ jobs:
         run: python -m black --check .
 
       - name: Test Django models
-        working-directory: app
         run: python manage.py test --parallel auto
