@@ -1,10 +1,9 @@
 import firebase_admin
+from configurations.django_config_parser import django_configs
 from django.contrib.auth.models import User
 from firebase_admin import auth, credentials
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-
-from backend.django_config_parser import django_configs
 
 from .models import Firebase
 

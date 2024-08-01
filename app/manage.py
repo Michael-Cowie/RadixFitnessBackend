@@ -2,12 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-from os.path import abspath, dirname, join
+
+from backend.configurations.setup_python_path import setup_python_path
 
 
 def main():
     """Run administrative tasks."""
-    sys.path.append(abspath(join(dirname(__file__))))  # Add app directory to PYTHONPATH
+    setup_python_path()
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
     try:
         from django.core.management import execute_from_command_line
