@@ -11,8 +11,6 @@ services:
 
   web:
     build: .
-    env_file:
-      - .dev.env
     depends_on:
       - db
 

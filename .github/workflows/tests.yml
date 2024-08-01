@@ -30,11 +30,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Create .dev.env file
-        working-directory: app/backend
-        run: |
-          printf "${{ secrets.DEV_DOT_ENV }}" > .dev.env
-
       - name: Test isort
         run: python -m isort --check .
 

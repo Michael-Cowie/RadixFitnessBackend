@@ -11,15 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-import sys
-from os.path import dirname, join
 from pathlib import Path
 
-# Load the .dev.env file.
-from dotenv import load_dotenv
-
-load_dotenv(join(dirname(__file__), ".dev.env"))
-
+from backend.django_config_parser import django_configs
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,14 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = django_configs.get("Django", "DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG", default=0))
+DEBUG = django_configs.get("Development", "Debug") == "True"
 
 # 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
 # For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1'
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(" ")
+ALLOWED_HOSTS = django_configs.get("Django", "DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -111,26 +105,27 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("SQL_DATABASE"),
-        "USER": os.environ.get("SQL_USER"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD"),
-        "HOST": os.environ.get("SQL_HOST"),
-        "PORT": os.environ.get("SQL_PORT"),
-    }
-}
-
 """
 When running test we do not want to connect to our database server. Instead, we want
 to run tests locally using SQLite3. This is because SQLite3 is acceptable for local
 development using low amounts of user data. This is ideal as it allows us to run 
 our tests without requiring a database server to be running as SQLite3 will create a 
 local database using the `db.sqlite3` file.
+
+Our Django configuration parser will default to using SQLite3. This is ideal for
+local development, running Docker locally and also using GitHub Actions. Environment
+variables will be configured when connecting to a database server.
 """
-if "test" in sys.argv:
-    DATABASES["default"] = {"ENGINE": "django.db.backends.sqlite3"}
+DATABASES = {
+    "default": {
+        "ENGINE": django_configs.get("Database", "SQL_ENGINE"),
+        "NAME": django_configs.get("Database", "SQL_DATABASE"),
+        "USER": django_configs.get("Database", "SQL_USER"),
+        "PASSWORD": django_configs.get("Database", "SQL_PASSWORD"),
+        "HOST": django_configs.get("Database", "SQL_HOST"),
+        "PORT": django_configs.get("Database", "SQL_PORT"),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
