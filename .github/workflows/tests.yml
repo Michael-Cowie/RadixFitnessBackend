@@ -27,7 +27,7 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Test isort
-        run: python -m isort --check --verbose .
+        run: python -m isort --check .
 
       - name: Test Black
         run: python -m black --check .
