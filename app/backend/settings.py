@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "profile",
     "weights",
     "firebase",
+    "daily_intake_tracking",
 ]
 
 REST_FRAMEWORK = {

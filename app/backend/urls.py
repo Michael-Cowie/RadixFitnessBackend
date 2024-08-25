@@ -37,18 +37,15 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # Swagger
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    # Admin
     path("admin/", admin.site.urls),
-    # Weight Tracking
     path("api/v1/measurements/weights/", include("weights.urls")),
-    # Profile Route
     path("api/v1/profile/", include("profile.urls")),
+    path("api/v1/food_intake_on_date/", include("daily_intake_tracking.urls")),
 ]
 
 
