@@ -25,21 +25,39 @@ class DailyIntakeTrackingView(APIView):
     @swagger_auto_schema(
         request_body=CreateDailyIntakeTrackingRequest,
         responses={
+            "200": openapi.Response(
+                description="Successfully updated the food tracking entry",
+            ),
             "201": openapi.Response(
                 description="Successfully created a food tracking entry",
             ),
-            "400": "Invalid data to create food tracking entry",
+            "400": "Invalid data for food tracking entry",
         },
     )
-    def post(self, request):
+    def put(self, request):
         """
-        Create an entry to track daily macronutrient intake for a particular date.
+        Create or update an entry to track daily macronutrient intake for a particular date.
+        If an entry for the specified date already exists, it will be updated; otherwise, a new entry will be created.
         """
         request_serializer = CreateDailyIntakeTrackingRequest(data=request.data)
-        if request_serializer.is_valid():
-            request_serializer.save(user_id=request.user)
 
-            return Response(status=status.HTTP_201_CREATED)
+        if request_serializer.is_valid():
+            user = request.user
+            date = request_serializer.validated_data.get("date")
+
+            try:
+                daily_intake_entry = DailyIntakeTracking.objects.get(
+                    user_id=user, date=date
+                )
+                request_serializer.update(
+                    instance=daily_intake_entry,
+                    validated_data=request_serializer.validated_data,
+                )
+                return Response(status=status.HTTP_200_OK)
+            except DailyIntakeTracking.DoesNotExist:
+                request_serializer.save(user_id=user)
+                return Response(status=status.HTTP_201_CREATED)
+
         return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(

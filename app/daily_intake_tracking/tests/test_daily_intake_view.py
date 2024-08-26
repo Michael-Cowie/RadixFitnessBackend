@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -43,116 +42,6 @@ class DailyIntakeTrackingViewTests(APITestCase):
     def _get_entry_for_user_on_date(self, user, user_date):
         return DailyIntakeTracking.objects.get(user_id=user, date=user_date)
 
-    def test_create_daily_intake_tracking_success(self):
-        """
-        Test that a valid POST request successfully creates a DailyIntakeTracking entry.
-
-        This test checks that when valid data is submitted via a POST request,
-        a new DailyIntakeTracking entry is created, and the API responds with a
-        201 Created status and the correct response data.
-        """
-        data = {
-            "date": date.today().isoformat(),
-            "current_calories": 2000,
-            "goal_calories": 2500,
-            "current_protein": 150,
-            "goal_protein": 200,
-            "current_carbs": 300,
-            "goal_carbs": 350,
-            "current_fats": 70,
-            "goal_fats": 80,
-        }
-
-        response = self.client.post(
-            self.url, json.dumps(data), content_type=self.content_type
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        daily_intake_model_entry = self._get_entry_for_user_on_date(
-            self.user, data["date"]
-        )
-
-        self.assertEqual(daily_intake_model_entry.user_id, self.user)
-        self.assertEqual(daily_intake_model_entry.date.isoformat(), data["date"])
-        self.assertEqual(
-            daily_intake_model_entry.current_calories, data["current_calories"]
-        )
-        self.assertEqual(daily_intake_model_entry.goal_calories, data["goal_calories"])
-        self.assertEqual(
-            daily_intake_model_entry.current_protein, data["current_protein"]
-        )
-        self.assertEqual(daily_intake_model_entry.goal_protein, data["goal_protein"])
-        self.assertEqual(daily_intake_model_entry.current_carbs, data["current_carbs"])
-        self.assertEqual(daily_intake_model_entry.goal_carbs, data["goal_carbs"])
-        self.assertEqual(daily_intake_model_entry.current_fats, data["current_fats"])
-        self.assertEqual(daily_intake_model_entry.goal_fats, data["goal_fats"])
-
-    def test_create_daily_intake_tracking_invalid_data(self):
-        """
-        Test that a POST request with invalid data returns a 400 Bad Request status.
-
-        This test will attempt to pass current_calories with a value of 6000,
-        passing the maximum of 5000. The test verifies that the POST does not add
-        it to the model.
-        """
-        data = {
-            "date": date.today().isoformat(),
-            "current_calories": 6000,
-            "goal_calories": 2500,
-            "current_protein": 150,
-            "goal_protein": 200,
-            "current_carbs": 300,
-            "goal_carbs": 350,
-            "current_fats": 70,
-            "goal_fats": 80,
-        }
-
-        response = self.client.post(
-            self.url, json.dumps(data), content_type=self.content_type
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        with self.assertRaises(DailyIntakeTracking.DoesNotExist):
-            self._get_entry_for_user_on_date(self.user, data["date"])
-
-        self.assertIn("current_calories", response.data)
-        self.assertEqual(
-            response.data["current_calories"][0],
-            "Ensure this value is less than or equal to 5000.",
-        )
-
-    def test_create_daily_intake_tracking_unauthenticated(self):
-        """
-        Test that an unauthenticated POST request returns a 403 Forbidden status.
-
-        This test checks that when an unauthenticated user attempts to create a
-        DailyIntakeTracking entry via a POST request, the API responds with a
-        403 Forbidden status.
-        """
-        self.client.logout()
-
-        data = {
-            "date": date.today().isoformat(),
-            "current_calories": 2000,
-            "goal_calories": 2500,
-            "current_protein": 150,
-            "goal_protein": 200,
-            "current_carbs": 300,
-            "goal_carbs": 350,
-            "current_fats": 70,
-            "goal_fats": 80,
-        }
-
-        response = self.client.post(
-            self.url, json.dumps(data), content_type=self.content_type
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        with self.assertRaises(DailyIntakeTracking.DoesNotExist):
-            self._get_entry_for_user_on_date(self.user, data["date"])
-
     def test_get_daily_intake_valid_date(self):
         response = self.client.get(self.url, {"date": self.test_data_date})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -172,3 +61,95 @@ class DailyIntakeTrackingViewTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Date parameter is required")
+
+    def test_put_update_daily_intake_tracking_success(self):
+        """
+        Test that a valid PUT request updates an existing DailyIntakeTracking entry and
+        correctly returns a 200 OK status.
+        """
+        updated_data = {
+            "date": self.test_data_date,
+            "current_calories": 1800,
+            "goal_calories": 2200,
+            "current_protein": 110,
+            "goal_protein": 160,
+            "current_carbs": 210,
+            "goal_carbs": 260,
+            "current_fats": 55,
+            "goal_fats": 75,
+        }
+
+        response = self.client.put(
+            self.url, json.dumps(updated_data), content_type=self.content_type
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        daily_intake_model_entry = self._get_entry_for_user_on_date(
+            self.user, updated_data["date"]
+        )
+
+        self.assertEqual(daily_intake_model_entry.user_id, self.user)
+        self.assertEqual(
+            daily_intake_model_entry.current_calories, updated_data["current_calories"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.goal_calories, updated_data["goal_calories"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.current_protein, updated_data["current_protein"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.goal_protein, updated_data["goal_protein"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.current_carbs, updated_data["current_carbs"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.goal_carbs, updated_data["goal_carbs"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.current_fats, updated_data["current_fats"]
+        )
+        self.assertEqual(daily_intake_model_entry.goal_fats, updated_data["goal_fats"])
+
+    def test_put_create_new_daily_intake_tracking_success(self):
+        """
+        Test that a valid PUT request creates a new DailyIntakeTracking entry if it doesn't exist
+        and correctly returns a 201 created status.
+        """
+        new_date = "2024-08-26"
+        new_data = {
+            "date": new_date,
+            "current_calories": 2000,
+            "goal_calories": 2500,
+            "current_protein": 150,
+            "goal_protein": 200,
+            "current_carbs": 300,
+            "goal_carbs": 350,
+            "current_fats": 70,
+            "goal_fats": 80,
+        }
+
+        response = self.client.put(
+            self.url, json.dumps(new_data), content_type=self.content_type
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        daily_intake_model_entry = self._get_entry_for_user_on_date(
+            self.user, new_data["date"]
+        )
+
+        self.assertEqual(daily_intake_model_entry.user_id, self.user)
+        self.assertEqual(daily_intake_model_entry.date.isoformat(), new_date)
+        self.assertEqual(
+            daily_intake_model_entry.current_calories, new_data["current_calories"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.goal_calories, new_data["goal_calories"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.current_protein, new_data["current_protein"]
+        )
+        self.assertEqual(
+            daily_intake_model_entry.goal_protein, new_data["goal_protein"]
+        )

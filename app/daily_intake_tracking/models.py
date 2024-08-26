@@ -16,34 +16,34 @@ class DailyIntakeTracking(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    date = models.DateField(unique=True)
+    date = models.DateField()
 
     current_calories = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
     goal_calories = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
 
     current_protein = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
     goal_protein = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
 
     current_carbs = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
     goal_carbs = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
 
     current_fats = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
     goal_fats = models.FloatField(
-        validators=[MinValueValidator(0), MaxValueValidator(5000)], default=0
+        validators=[MinValueValidator(0), MaxValueValidator(5000)]
     )
 
     def __str__(self):
