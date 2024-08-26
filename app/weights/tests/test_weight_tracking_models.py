@@ -17,9 +17,7 @@ class WeightTrackingModelTest(TestCase):
         self.user = User.objects.get(id=1)
 
     def _create_weight_tracking_entry(self, date, weight, user_id, notes=""):
-        return Weights.objects.create(
-            date=date, weight_kg=weight, user_id=user_id, notes=notes
-        )
+        return Weights.objects.create(date=date, weight_kg=weight, user_id=user_id, notes=notes)
 
     def test_weight_tracking_model_creation(self):
         date = "2024-01-06"
@@ -52,19 +50,13 @@ class WeightTrackingModelTest(TestCase):
         # Try creating a WeightTracking instance with invalid weights
         with self.assertRaises(ValidationError):
             negative_weight = -5.0  # Negative weights is not allowed
-            weight = self._create_weight_tracking_entry(
-                "2024-01-06", negative_weight, self.user
-            )
+            weight = self._create_weight_tracking_entry("2024-01-06", negative_weight, self.user)
             weight.full_clean()
 
         # Try creating a WeightTracking instance with invalid date format
         with self.assertRaises(ValidationError):
-            invalid_date_format = (
-                "2024/01/06"  # Invalid date format, using / instead of -
-            )
-            weight = self._create_weight_tracking_entry(
-                invalid_date_format, 70.5, self.user
-            )
+            invalid_date_format = "2024/01/06"  # Invalid date format, using / instead of -
+            weight = self._create_weight_tracking_entry(invalid_date_format, 70.5, self.user)
             weight.full_clean()
 
     def test_weight_tracking_model_filter_by_date(self):
@@ -84,9 +76,7 @@ class WeightTrackingModelTest(TestCase):
         user_input = 165
         weight_kg = user_input / kg_to_lbs
 
-        weight_entry = self._create_weight_tracking_entry(
-            "2024-01-01", weight_kg, self.user
-        )
+        weight_entry = self._create_weight_tracking_entry("2024-01-01", weight_kg, self.user)
 
         restored_user_weight = weight_entry.weight_kg * kg_to_lbs
         self.assertEqual(user_input, restored_user_weight)
@@ -105,7 +95,5 @@ class WeightTrackingModelTest(TestCase):
 
     def test_weight_tracking_with_notes(self):
         notes = "Going well, keep it up!"
-        weight_entry = self._create_weight_tracking_entry(
-            "2024-01-01", 70, self.user, notes=notes
-        )
+        weight_entry = self._create_weight_tracking_entry("2024-01-01", 70, self.user, notes=notes)
         self.assertEqual(weight_entry.notes, notes)

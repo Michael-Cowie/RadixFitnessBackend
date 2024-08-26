@@ -79,37 +79,19 @@ class DailyIntakeTrackingViewTests(APITestCase):
             "goal_fats": 75,
         }
 
-        response = self.client.put(
-            self.url, json.dumps(updated_data), content_type=self.content_type
-        )
+        response = self.client.put(self.url, json.dumps(updated_data), content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        daily_intake_model_entry = self._get_entry_for_user_on_date(
-            self.user, updated_data["date"]
-        )
+        daily_intake_model_entry = self._get_entry_for_user_on_date(self.user, updated_data["date"])
 
         self.assertEqual(daily_intake_model_entry.user_id, self.user)
-        self.assertEqual(
-            daily_intake_model_entry.current_calories, updated_data["current_calories"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.goal_calories, updated_data["goal_calories"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.current_protein, updated_data["current_protein"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.goal_protein, updated_data["goal_protein"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.current_carbs, updated_data["current_carbs"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.goal_carbs, updated_data["goal_carbs"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.current_fats, updated_data["current_fats"]
-        )
+        self.assertEqual(daily_intake_model_entry.current_calories, updated_data["current_calories"])
+        self.assertEqual(daily_intake_model_entry.goal_calories, updated_data["goal_calories"])
+        self.assertEqual(daily_intake_model_entry.current_protein, updated_data["current_protein"])
+        self.assertEqual(daily_intake_model_entry.goal_protein, updated_data["goal_protein"])
+        self.assertEqual(daily_intake_model_entry.current_carbs, updated_data["current_carbs"])
+        self.assertEqual(daily_intake_model_entry.goal_carbs, updated_data["goal_carbs"])
+        self.assertEqual(daily_intake_model_entry.current_fats, updated_data["current_fats"])
         self.assertEqual(daily_intake_model_entry.goal_fats, updated_data["goal_fats"])
 
     def test_put_create_new_daily_intake_tracking_success(self):
@@ -130,26 +112,14 @@ class DailyIntakeTrackingViewTests(APITestCase):
             "goal_fats": 80,
         }
 
-        response = self.client.put(
-            self.url, json.dumps(new_data), content_type=self.content_type
-        )
+        response = self.client.put(self.url, json.dumps(new_data), content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        daily_intake_model_entry = self._get_entry_for_user_on_date(
-            self.user, new_data["date"]
-        )
+        daily_intake_model_entry = self._get_entry_for_user_on_date(self.user, new_data["date"])
 
         self.assertEqual(daily_intake_model_entry.user_id, self.user)
         self.assertEqual(daily_intake_model_entry.date.isoformat(), new_date)
-        self.assertEqual(
-            daily_intake_model_entry.current_calories, new_data["current_calories"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.goal_calories, new_data["goal_calories"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.current_protein, new_data["current_protein"]
-        )
-        self.assertEqual(
-            daily_intake_model_entry.goal_protein, new_data["goal_protein"]
-        )
+        self.assertEqual(daily_intake_model_entry.current_calories, new_data["current_calories"])
+        self.assertEqual(daily_intake_model_entry.goal_calories, new_data["goal_calories"])
+        self.assertEqual(daily_intake_model_entry.current_protein, new_data["current_protein"])
+        self.assertEqual(daily_intake_model_entry.goal_protein, new_data["goal_protein"])

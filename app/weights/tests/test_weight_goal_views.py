@@ -28,14 +28,10 @@ class WeightGoalTest(TestCase):
     def setUpTestData(cls):
         user = User.objects.create(id=1, username="Test User")
 
-        WeightGoal.objects.create(
-            goal_date="2025-01-01", goal_weight_kg=70, user_id=user
-        )
+        WeightGoal.objects.create(goal_date="2025-01-01", goal_weight_kg=70, user_id=user)
 
     def _change_user(self, user_id):
-        user = User.objects.create(
-            id=user_id, username=f"New Test User with id {user_id}"
-        )
+        user = User.objects.create(id=user_id, username=f"New Test User with id {user_id}")
 
         self.client = APIClient()
         self.client.force_authenticate(user=user)
@@ -44,25 +40,17 @@ class WeightGoalTest(TestCase):
         response_data = self.client.get(self.test_url).data
 
         model_entry = WeightGoal.objects.get(id=1)
-        self.assertEqual(
-            model_entry.goal_date, self.date_as_datetime(response_data["goal_date"])
-        )
+        self.assertEqual(model_entry.goal_date, self.date_as_datetime(response_data["goal_date"]))
         self.assertEqual(model_entry.goal_weight_kg, response_data["goal_weight_kg"])
 
     def test_basic_creation(self):
-        self._change_user(
-            user_id=2
-        )  # Change user as we already created a test weight in setUpTestData
+        self._change_user(user_id=2)  # Change user as we already created a test weight in setUpTestData
 
         goal_date = "2025-01-01"
         goal_weight_kg = 70
-        request_data = json.dumps(
-            {"goal_date": goal_date, "goal_weight_kg": goal_weight_kg}
-        )
+        request_data = json.dumps({"goal_date": goal_date, "goal_weight_kg": goal_weight_kg})
 
-        response = self.client.post(
-            self.test_url, data=request_data, content_type=self.content_type
-        )
+        response = self.client.post(self.test_url, data=request_data, content_type=self.content_type)
         response_data = response.data
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -77,9 +65,7 @@ class WeightGoalTest(TestCase):
             }
         )
 
-        response = self.client.patch(
-            self.test_url, data=request_data, content_type=self.content_type
-        )
+        response = self.client.patch(self.test_url, data=request_data, content_type=self.content_type)
         response_data = response.data
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -97,9 +83,7 @@ class WeightGoalTest(TestCase):
             }
         )
 
-        response = self.client.patch(
-            self.test_url, data=request_data, content_type=self.content_type
-        )
+        response = self.client.patch(self.test_url, data=request_data, content_type=self.content_type)
         response_data = response.data
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

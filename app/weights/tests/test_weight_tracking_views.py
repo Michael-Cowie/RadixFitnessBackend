@@ -52,9 +52,7 @@ class AllWeightsView(WeightsTest):
         """
         for weight in self.data:
             expected_weight = Weights.objects.get(id=weight["id"])
-            self.assertEqual(
-                self.date_as_datetime(weight["date"]), expected_weight.date
-            )
+            self.assertEqual(self.date_as_datetime(weight["date"]), expected_weight.date)
             self.assertEqual(weight["weight_kg"], expected_weight.weight_kg)
             self.assertEqual(weight["user_id"], expected_weight.user_id.id)
 
@@ -132,9 +130,7 @@ class WeightsViewTest(WeightsTest):
 
     def test_creating_a_weight(self):
         # 1. Send a POST to create the weight
-        response = self.client.post(
-            self.test_url, data=self.data, content_type=self.content_type
-        )
+        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.data
         response_id = response_data["id"]
@@ -151,9 +147,7 @@ class WeightsViewTest(WeightsTest):
         self.client.post(self.test_url, data=self.data, content_type=self.content_type)
 
         # 2. Send a POST to create a same on the same day
-        response = self.client.post(
-            self.test_url, data=self.data, content_type=self.content_type
-        )
+        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_updating_a_weight(self):
@@ -163,9 +157,7 @@ class WeightsViewTest(WeightsTest):
         # 2. Send a PATCH to update the weight and unit
         new_weight = 230
         new_data = json.dumps({"date": self.date, "weight_kg": new_weight})
-        response = self.client.patch(
-            self.test_url, data=new_data, content_type=self.content_type
-        )
+        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
 
         # 3. Verify that the weight has been updated in the model
         weight_id = response.data["id"]
@@ -182,9 +174,7 @@ class WeightsViewTest(WeightsTest):
         new_weight = 999
         new_data = json.dumps({"date": self.date, "weight_kg": new_weight})
 
-        response = self.client.patch(
-            self.test_url, data=new_data, content_type=self.content_type
-        )
+        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
 
         # 3. Verify that the weight has been updated in the model and the unit remains unchanged
         weight_id = response.data["id"]
@@ -195,9 +185,7 @@ class WeightsViewTest(WeightsTest):
 
     def test_updating_notes(self):
         # 1. Send a POST to create the weight
-        data = json.dumps(
-            {"date": self.date, "weight_kg": self.weight, "notes": "My initial notes"}
-        )
+        data = json.dumps({"date": self.date, "weight_kg": self.weight, "notes": "My initial notes"})
 
         self.client.post(self.test_url, data=data, content_type=self.content_type)
 
@@ -205,9 +193,7 @@ class WeightsViewTest(WeightsTest):
         new_notes = "My new notes"
         new_data = json.dumps({"date": self.date, "notes": new_notes})
 
-        response = self.client.patch(
-            self.test_url, data=new_data, content_type=self.content_type
-        )
+        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
 
         # 3. Verify that the notes has been updated in the model and the unit remains unchanged
         weight_id = response.data["id"]
@@ -218,15 +204,11 @@ class WeightsViewTest(WeightsTest):
 
     def test_deleting_a_weight(self):
         # 1. Send a POST to create the weight
-        response = self.client.post(
-            self.test_url, data=self.data, content_type=self.content_type
-        )
+        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
         weight_id = response.data["id"]
 
         # 2. Send a DELETE to delete the weight
-        response = self.client.delete(
-            self.test_url, data=self.data, content_type=self.content_type
-        )
+        response = self.client.delete(self.test_url, data=self.data, content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # 5. Verify that the weight has been deleted.

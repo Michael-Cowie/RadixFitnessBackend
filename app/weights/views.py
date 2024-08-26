@@ -81,14 +81,10 @@ class WeightsView(APIView):
         if updated_notes := request.data.get("notes"):
             updated_data["notes"] = updated_notes
 
-        request_serializer = WeightTrackingRequest(
-            weight, data=updated_data, partial=True
-        )
+        request_serializer = WeightTrackingRequest(weight, data=updated_data, partial=True)
         if request_serializer.is_valid():
             response_data = updated_data | {"user_id": request.user.id}
-            response_serializer = WeightTrackingResponse(
-                weight, data=response_data, partial=True
-            )
+            response_serializer = WeightTrackingResponse(weight, data=response_data, partial=True)
             if response_serializer.is_valid():
                 response_serializer.save()
                 return Response(response_serializer.data, status=status.HTTP_200_OK)
@@ -198,14 +194,10 @@ class WeightGoalView(APIView):
         if goal_weight_kg := request.data.get("goal_weight_kg"):
             updated_data["goal_weight_kg"] = goal_weight_kg
 
-        request_serializer = WeightGoalRequest(
-            existing_entry, data=updated_data, partial=True
-        )
+        request_serializer = WeightGoalRequest(existing_entry, data=updated_data, partial=True)
         if request_serializer.is_valid():
             response_data = updated_data | {"user_id": request.user.id}
-            response_serializer = WeightGoalResponse(
-                existing_entry, data=response_data, partial=True
-            )
+            response_serializer = WeightGoalResponse(existing_entry, data=response_data, partial=True)
             if response_serializer.is_valid():
                 response_serializer.save()
                 return Response(response_serializer.data, status=status.HTTP_200_OK)

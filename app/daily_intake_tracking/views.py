@@ -46,9 +46,7 @@ class DailyIntakeTrackingView(APIView):
             date = request_serializer.validated_data.get("date")
 
             try:
-                daily_intake_entry = DailyIntakeTracking.objects.get(
-                    user_id=user, date=date
-                )
+                daily_intake_entry = DailyIntakeTracking.objects.get(user_id=user, date=date)
                 request_serializer.update(
                     instance=daily_intake_entry,
                     validated_data=request_serializer.validated_data,
@@ -85,6 +83,4 @@ class DailyIntakeTrackingView(APIView):
             response_data = DailyIntakeTrackingResponse(daily_intake).data
             return Response(response_data, status=status.HTTP_200_OK)
         except Http404:
-            return Response(
-                {"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND)

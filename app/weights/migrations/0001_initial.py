@@ -30,9 +30,7 @@ class Migration(migrations.Migration):
                 ("goal_date", models.DateField()),
                 (
                     "goal_weight_kg",
-                    models.FloatField(
-                        validators=[django.core.validators.MinValueValidator(1)]
-                    ),
+                    models.FloatField(validators=[django.core.validators.MinValueValidator(1)]),
                 ),
                 (
                     "user_id",
@@ -58,9 +56,7 @@ class Migration(migrations.Migration):
                 ("date", models.DateField()),
                 (
                     "weight_kg",
-                    models.FloatField(
-                        validators=[django.core.validators.MinValueValidator(1)]
-                    ),
+                    models.FloatField(validators=[django.core.validators.MinValueValidator(1)]),
                 ),
                 ("notes", models.CharField(blank=True, default="", max_length=255)),
                 (

@@ -3,9 +3,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-alpha = RegexValidator(
-    r"^[a-zA-Z]+$", "Only alpha characters of length 1 or more are accepted"
-)
+alpha = RegexValidator(r"^[a-zA-Z]+$", "Only alpha characters of length 1 or more are accepted")
 
 
 class Units(models.TextChoices):

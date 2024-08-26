@@ -15,9 +15,7 @@ class WeightGoalModelTest(TestCase):
         self.user = User.objects.get(id=1)
 
     def _create_weight_goal_entry(self, goal_date, goal_weight_kg, user_id):
-        return WeightGoal.objects.create(
-            goal_date=goal_date, goal_weight_kg=goal_weight_kg, user_id=user_id
-        )
+        return WeightGoal.objects.create(goal_date=goal_date, goal_weight_kg=goal_weight_kg, user_id=user_id)
 
     def test_basic_creation(self):
         goal_date = "2024-01-01"

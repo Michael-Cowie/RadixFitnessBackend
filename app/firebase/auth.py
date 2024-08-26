@@ -9,9 +9,7 @@ from .models import Firebase
 
 if django_configs.get("Development", "USE_FIREBASE") == "True":
     certificate = {
-        "private_key": django_configs.get("Firebase", "FIREBASE_PRIVATE_KEY").replace(
-            "\\n", "\n"
-        ),
+        "private_key": django_configs.get("Firebase", "FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
         "private_key_id": django_configs.get("Firebase", "FIREBASE_PRIVATE_KEY_ID"),
         "client_id": django_configs.get("Firebase", "FIREBASE_CLIENT_ID"),
         "client_email": django_configs.get("Firebase", "FIREBASE_CLIENT_EMAIL"),
@@ -19,12 +17,8 @@ if django_configs.get("Development", "USE_FIREBASE") == "True":
         "project_id": django_configs.get("Firebase", "FIREBASE_PROJECT_ID"),
         "auth_uri": django_configs.get("Firebase", "FIREBASE_AUTH_URI"),
         "token_uri": django_configs.get("Firebase", "FIREBASE_TOKEN_URI"),
-        "auth_provider_x509_cert_url": django_configs.get(
-            "Firebase", "FIREBASE_AUTH_PROVIDER_X509_CERT_URL"
-        ),
-        "client_x509_cert_url": django_configs.get(
-            "Firebase", "FIREBASE_CLIENT_X509_CERT_URL"
-        ),
+        "auth_provider_x509_cert_url": django_configs.get("Firebase", "FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
+        "client_x509_cert_url": django_configs.get("Firebase", "FIREBASE_CLIENT_X509_CERT_URL"),
         "universe_domain": django_configs.get("Firebase", "FIREBASE_UNIVERSE_DOMAIN"),
     }
 

@@ -18,9 +18,7 @@ class ProfileModelTest(TestCase):
         name = "Michael"
         measurement_system = "Metric"
 
-        profile = Profile.objects.create(
-            name=name, measurement_system=measurement_system, user_id=self.user
-        )
+        profile = Profile.objects.create(name=name, measurement_system=measurement_system, user_id=self.user)
         profile.full_clean()
 
         self.assertEqual(profile.name, name)
