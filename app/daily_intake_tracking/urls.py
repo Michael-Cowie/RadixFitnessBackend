@@ -4,7 +4,7 @@ from .views import DailyIntakeTrackingView
 
 urlpatterns = [
     path(
-        "macronutrient_progress/",
+        "macronutrient-progress/",
         DailyIntakeTrackingView.as_view(),
         name="macronutrient_date_progress",
     ),

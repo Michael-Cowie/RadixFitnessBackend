@@ -45,7 +45,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/measurements/weights/", include("weights.urls")),
     path("api/v1/profile/", include("profile.urls")),
-    path("api/v1/food_intake_on_date/", include("daily_intake_tracking.urls")),
+    path("api/v1/food_intake/", include("daily_intake_tracking.urls")),
 ]
 
 
