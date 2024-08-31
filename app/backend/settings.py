@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "weights",
     "firebase",
     "daily_intake_tracking",
+    "fooddata_central_service",
 ]
 
 REST_FRAMEWORK = {

@@ -1,15 +1,3 @@
-- Dev = compose with postgres + thingy
-- Prod = postgres on server
-
+To read
+-------
 https://teamplify.com/blog/zero-downtime-DB-migrations/
-
-
-Prod
-----
-
-Frontend hosting = AWS (npm run build -> Throw AWS this)
-Backend hosting = fly (Using Docker)
-
-Dev
----
-Docker compose for web + postgres on local machine with volume up.
