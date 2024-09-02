@@ -14,6 +14,7 @@ class FoodDataCentralService:
         - https://fdc.nal.usda.gov/portal-data/external/dataDictionary
         - https://fdc.nal.usda.gov/download-datasets.html
     """
+
     BASE_URL = "https://api.nal.usda.gov/fdc/v1/foods"
 
     @staticmethod

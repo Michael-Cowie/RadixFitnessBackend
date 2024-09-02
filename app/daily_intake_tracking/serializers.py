@@ -1,6 +1,18 @@
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from .models import CURRENT_COLUMNS, GOAL_COLUMNS, DailyIntakeTracking
+from .models import (
+    CURRENT_COLUMNS,
+    GOAL_COLUMNS,
+    DailyIntakeTracking,
+    FoodEntryTracking,
+)
+
+
+class FoodEntryTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FoodEntryTracking
+        fields = "__all__"
 
 
 class CreateDailyIntakeTrackingRequest(ModelSerializer):

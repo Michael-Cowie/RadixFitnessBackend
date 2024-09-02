@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.http import Http404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -5,10 +6,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import DailyIntakeTracking
+from .models import DailyIntakeTracking, FoodEntryTracking
 from .serializers import (
     CreateDailyIntakeTrackingRequest,
     DailyIntakeTrackingResponse,
+    FoodEntryTrackingSerializer,
     GetDailyIntakeTrackingRequest,
 )
 
@@ -84,3 +86,104 @@ class DailyIntakeTrackingView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         except Http404:
             return Response({"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class FoodEntryTrackingView(APIView):
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "date", openapi.IN_QUERY, description="Date (YYYY-MM-DD)", type=openapi.TYPE_STRING, required=True
+            )
+        ],
+        responses={200: FoodEntryTrackingSerializer(many=True), 400: "Bad Request", 404: "Not Found"},
+    )
+    def get(self, request):
+        user = request.user
+        date = request.query_params.get("date")
+
+        if not date:
+            return Response({"detail": "Date parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        entries = FoodEntryTracking.objects.filter(user_id=user, date=date)
+        if not entries.exists():
+            return Response({"detail": "No entries found for the given date."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FoodEntryTrackingSerializer(entries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        request_body=FoodEntryTrackingSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                "date", openapi.IN_QUERY, description="Date (YYYY-MM-DD)", type=openapi.TYPE_STRING, required=True
+            )
+        ],
+        responses={201: "Entry created", 400: "Bad Request"},
+    )
+    def post(self, request):
+        user = request.user
+        date = request.query_params.get("date")
+
+        if not date:
+            return Response({"detail": "Date parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = request.data
+        data["user_id"] = user.id
+        data["date"] = date
+
+        serializer = FoodEntryTrackingSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        request_body=FoodEntryTrackingSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                "id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True
+            )
+        ],
+        responses={200: "Entry updated", 400: "Bad Request", 404: "Not Found"},
+    )
+    def patch(self, request):
+        user = request.user
+        entry_id = request.query_params.get("id")
+
+        if not entry_id:
+            return Response({"detail": "Entry ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        entry = FoodEntryTracking.objects.filter(id=entry_id, user_id=user).first()
+        if not entry:
+            return Response({"detail": "Entry not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FoodEntryTrackingSerializer(entry, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True
+            )
+        ],
+        responses={204: "Entry deleted", 400: "Bad Request", 404: "Not Found"},
+    )
+    def delete(self, request):
+        user = request.user
+        entry_id = request.query_params.get("id")
+
+        if not entry_id:
+            return Response({"detail": "Entry ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        entry = FoodEntryTracking.objects.filter(id=entry_id, user_id=user).first()
+        if not entry:
+            return Response({"detail": "Entry not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        entry.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

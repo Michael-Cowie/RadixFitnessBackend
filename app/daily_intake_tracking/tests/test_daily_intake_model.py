@@ -8,29 +8,11 @@ from ..models import DailyIntakeTracking
 
 
 class DailyIntakeTrackingTest(TestCase):
-    """
-    Test suite for the DailyIntakeTracking model.
-
-    This test suite ensures that the DailyIntakeTracking model behaves as expected,
-    including creation, validation, and string representation of the model instances.
-    """
-
     @classmethod
     def setUpTestData(cls):
-        """
-        Set up initial data for the test suite.
-
-        This method creates a User instance to be used throughout the tests.
-        """
         User.objects.create(id=1, username="Test User")
 
     def setUp(self):
-        """
-        Set up data before each test case.
-
-        This method retrieves the User instance created in setUpTestData
-        and assigns it to an instance variable for use in individual tests.
-        """
         self.user = User.objects.get(id=1)
 
     def test_create_daily_intake_tracking(self):
