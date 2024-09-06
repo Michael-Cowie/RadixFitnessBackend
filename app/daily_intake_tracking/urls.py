@@ -8,5 +8,5 @@ urlpatterns = [
         DailyIntakeTrackingView.as_view(),
         name="macronutrient_date_progress",
     ),
-    path("food-entries", FoodEntryTrackingView.as_view(), name="food-entries"),
+    path("food-entries/", FoodEntryTrackingView.as_view(), name="food-entries"),
 ]

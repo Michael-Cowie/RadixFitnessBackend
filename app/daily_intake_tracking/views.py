@@ -142,9 +142,7 @@ class FoodEntryTrackingView(APIView):
     @swagger_auto_schema(
         request_body=FoodEntryTrackingSerializer,
         manual_parameters=[
-            openapi.Parameter(
-                "id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True
-            )
+            openapi.Parameter("id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True)
         ],
         responses={200: "Entry updated", 400: "Bad Request", 404: "Not Found"},
     )
@@ -168,9 +166,7 @@ class FoodEntryTrackingView(APIView):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter(
-                "id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True
-            )
+            openapi.Parameter("id", openapi.IN_QUERY, description="Entry ID", type=openapi.TYPE_INTEGER, required=True)
         ],
         responses={204: "Entry deleted", 400: "Bad Request", 404: "Not Found"},
     )

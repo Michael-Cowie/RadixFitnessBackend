@@ -32,9 +32,7 @@ class FoodEntryTrackingTestCase(TestCase):
         ]
 
     def setUp(self):
-        self.food_entries = [
-            FoodEntryTracking.objects.create(**entry) for entry in self.test_data
-        ]
+        self.food_entries = [FoodEntryTracking.objects.create(**entry) for entry in self.test_data]
 
     def test_food_entry_creation(self):
         entries = FoodEntryTracking.objects.filter(user_id=self.user, date="2024-09-01")
