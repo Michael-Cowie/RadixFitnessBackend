@@ -1,15 +1,10 @@
 from django.contrib import admin
 
-from .models import (
-    CURRENT_COLUMNS,
-    GOAL_COLUMNS,
-    DailyIntakeTracking,
-    FoodEntryTracking,
-)
+from .models import GOAL_COLUMNS, DailyIntakeTracking, FoodEntryTracking
 
 
 class DailyIntakeTrackingAdmin(admin.ModelAdmin):
-    list_display = ("id", "user_id", "date", *CURRENT_COLUMNS, *GOAL_COLUMNS)
+    list_display = ("id", "user_id", "date", *GOAL_COLUMNS)
 
 
 class FoodEntryTrackingAdmin(admin.ModelAdmin):

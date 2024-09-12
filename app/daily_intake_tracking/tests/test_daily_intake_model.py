@@ -26,25 +26,17 @@ class DailyIntakeTrackingTest(TestCase):
         daily_intake = DailyIntakeTracking.objects.create(
             user_id=self.user,
             date=date.today(),
-            current_calories=2000,
             goal_calories=2500,
-            current_protein=150,
             goal_protein=200,
-            current_carbs=300,
             goal_carbs=350,
-            current_fats=70,
             goal_fats=80,
         )
 
         self.assertEqual(daily_intake.user_id, self.user)
         self.assertEqual(daily_intake.date, date.today())
-        self.assertEqual(daily_intake.current_calories, 2000)
         self.assertEqual(daily_intake.goal_calories, 2500)
-        self.assertEqual(daily_intake.current_protein, 150)
         self.assertEqual(daily_intake.goal_protein, 200)
-        self.assertEqual(daily_intake.current_carbs, 300)
         self.assertEqual(daily_intake.goal_carbs, 350)
-        self.assertEqual(daily_intake.current_fats, 70)
         self.assertEqual(daily_intake.goal_fats, 80)
 
     def test_unique_together_constraint(self):
@@ -58,13 +50,9 @@ class DailyIntakeTrackingTest(TestCase):
         DailyIntakeTracking.objects.create(
             user_id=self.user,
             date=date.today(),
-            current_calories=2000,
             goal_calories=2500,
-            current_protein=150,
             goal_protein=200,
-            current_carbs=300,
             goal_carbs=350,
-            current_fats=70,
             goal_fats=80,
         )
 
@@ -72,13 +60,9 @@ class DailyIntakeTrackingTest(TestCase):
             duplicate_entry = DailyIntakeTracking(
                 user_id=self.user,
                 date=date.today(),
-                current_calories=1800,
                 goal_calories=2300,
-                current_protein=140,
                 goal_protein=190,
-                current_carbs=280,
                 goal_carbs=330,
-                current_fats=65,
                 goal_fats=75,
             )
             duplicate_entry.full_clean()  # This will trigger the unique constraint validation
@@ -88,20 +72,16 @@ class DailyIntakeTrackingTest(TestCase):
         Test that a ValidationError is raised when a value exceeds its maximum limit.
 
         This test checks the validation logic of the model, particularly ensuring that
-        if the current_calories field exceeds the maximum allowed value of 5000, a
+        if the goal_calories field exceeds the maximum allowed value of 5000, a
         ValidationError is raised. This test uses the full_clean() method to manually
         trigger model validation.
         """
         daily_intake = DailyIntakeTracking(
             user_id=self.user,
             date=date.today(),
-            current_calories=6000,  # Invalid value, exceeds maximum allowed
-            goal_calories=2500,
-            current_protein=150,
+            goal_calories=6000,  # Invalid value, exceeds maximum allowed
             goal_protein=200,
-            current_carbs=300,
             goal_carbs=350,
-            current_fats=70,
             goal_fats=80,
         )
 
@@ -113,19 +93,15 @@ class DailyIntakeTrackingTest(TestCase):
         Test that a ValidationError is raised when a value is below its minimum limit.
 
         This test checks the validation logic of the model, ensuring that if the
-        current_calories field is below the minimum allowed value of 0, a ValidationError
+        goal_calories field is below the minimum allowed value of 0, a ValidationError
         is raised. This test also uses the full_clean() method to manually trigger model validation.
         """
         daily_intake = DailyIntakeTracking(
             user_id=self.user,
             date=date.today(),
-            current_calories=-100,  # Invalid value, below minimum allowed
-            goal_calories=2500,
-            current_protein=150,
+            goal_calories=-100,  # Invalid value, below minimum allowed
             goal_protein=200,
-            current_carbs=300,
             goal_carbs=350,
-            current_fats=70,
             goal_fats=80,
         )
 
@@ -141,22 +117,18 @@ class DailyIntakeTrackingTest(TestCase):
         daily_intake = DailyIntakeTracking.objects.create(
             user_id=self.user,
             date=date.today(),
-            current_calories=2000,
             goal_calories=2500,
-            current_protein=150,
             goal_protein=200,
-            current_carbs=300,
             goal_carbs=350,
-            current_fats=70,
             goal_fats=80,
         )
         expected_str = f"""
-        On {daily_intake.date} you have have the following intake,
+        On {daily_intake.date} you have have the following goals,
 
-        - Calories {daily_intake.current_calories} / {daily_intake.goal_calories}
-        - Protein {daily_intake.current_protein} / {daily_intake.goal_protein}
-        - Carbs {daily_intake.current_carbs} / {daily_intake.goal_carbs}
-        - Fats {daily_intake.current_fats} / {daily_intake.goal_fats}
+        - Goal calories {daily_intake.goal_calories}
+        - Goal protein {daily_intake.goal_protein}
+        - Goal carbs {daily_intake.goal_carbs}
+        - Goal fats {daily_intake.goal_fats}
 """
         # Assert that the __str__ method returns the expected string
         self.assertEqual(str(daily_intake).strip(), expected_str.strip())
