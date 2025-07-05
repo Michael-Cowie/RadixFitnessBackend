@@ -1,5 +1,6 @@
 # Django database
 database/db.sqlite3
+app/RadixDB
 
 # PyCharm virtual environment
 venv
@@ -9,6 +10,7 @@ venv
 
 # dotenv file
 .dev.env
+app/backend/configurations/.env
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
