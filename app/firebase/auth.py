@@ -49,9 +49,13 @@ class FirebaseAuthentication(BaseAuthentication):
             raise AuthenticationFailed(f"Authentication failed: {str(e)}")
 
         if firebase_uid := decoded_token.get("uid"):
-            firebase_user, _ = Firebase.objects.get_or_create(
-                uid=firebase_uid, defaults={"user_id": User.objects.create_user(username=firebase_uid)}
-            )
+            try:
+                firebase_user = Firebase.objects.get(uid=firebase_uid)
+            except Firebase.DoesNotExist:
+                # Create the user first
+                user = User.objects.create_user(username=firebase_uid)
+                # Then create the Firebase object with user_id
+                firebase_user = Firebase.objects.create(uid=firebase_uid, user_id=user)
 
             return firebase_user.user_id, decoded_token
         else:
