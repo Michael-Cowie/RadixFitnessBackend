@@ -29,7 +29,7 @@ in this area are
 - **Deserialization** - The process of converting incoming raw data, typically received in formats such as JSON, XML, or form data, into native Python data types that can be easily manipulated within the Django application. 
 - **Schema** - A definition of expected data structure. For example, JSON Schema defines what valid JSON looks like.
 
-#### Validation Before Processing
+## Validation Before Processing
 
 Validation is the process of ensuring that input data adheres to expected formats and constraints before acting on it. In DRF, **serializers are the primary validation mechanism**. Manually validating `request.data` should be avoided in favour of declarative, reusable serializer logic.
 
@@ -71,7 +71,7 @@ serializer.is_valid(raise_exception=True)
 user = serializer.save()
 ```
 
-#### Model Serializers
+## Model Serializers
 
 `ModelSerializer` is a subclass of `Serializer` that automatically generates fields from a Django model. It simplifies the creation
 of serializers for **typical CRUD operations**. Use `ModelSerializer` when the incoming or outgoing data **directly represents a database model instance or queryset**. It is ideal for operations that create, retrieve, update, or delete model-backed resources.
@@ -97,7 +97,7 @@ Use the naming convention `<ModelName><Purpose>Serializer`
 | Create or Update    | `BookUpsertSerializer`          | PUT         | For `update_or_create` semantics          |
 | Partial Update      | `BookPartialUpdateSerializer`   | PATCH       | Partial updates, fewer required fields    |
 
-##### ModelSerializer - GET
+### ModelSerializer - GET
 
 The `GET` method is used to **retrieve data**, typically for,
 
@@ -122,7 +122,7 @@ def get(self, request):
     return Response(serializer.data)
 ```
 
-##### ModelSerializer - POST
+### ModelSerializer - POST
 
 The `POST` method is used to **create new resources** or **trigger actions**.
 
@@ -145,7 +145,7 @@ def post(self, request):
     return Response(ProductSerializer(product).data, status=201)
 ```
 
-##### ModelSerializer - PUT
+### ModelSerializer - PUT
 
 The `PUT` method is meant for a complete replacement of a resource. It is also commonly used for idempotent upserts, where
 
@@ -220,7 +220,7 @@ def put(self, request):
     return Response(DailyLogSerializer(instance).data, status=200)
 ```
 
-##### ModelSerializer - PATCH
+### ModelSerializer - PATCH
 
 The `PATCH` method is used for **partial updates** to a resource.
 
@@ -244,7 +244,7 @@ def patch(self, request, pk):
     return Response(serializer.data)
 ```
 
-##### ModelSerializer - DELETE
+### ModelSerializer - DELETE
 
 The `DELETE` method is used to **remove a resource**. Usually, no serializer is needed.
 
@@ -257,7 +257,7 @@ def delete(self, request, pk):
     return Response(status=204)
 ```
 
-#### Non-Model Serializers.
+## Non-Model Serializers.
 
 `Serializer` is a manually defined serializer class for validating and transforming arbitrary input or output data **that is not tied to a Django model**. You must define all fields, validation rules and persistence logic manually.
 
@@ -283,7 +283,7 @@ Use the naming convention `<Purpose>Serializer`
 | Output only       | `HealthCheckResponseSerializer`  |
 | Mixed fields      | `DateRangeFilterSerializer`      |
 
-##### Serializer - GET
+### Serializer - GET
 
 Use `Serializer` when returning **computed, external**, or **non-model data**.
 
@@ -328,7 +328,7 @@ class DailyReportView(APIView):
         return Response(serializer.validated_data)
 ```
 
-##### Serializer - POST
+### Serializer - POST
 
 The `POST` method is used to **create new resources** or **trigger actions**.
 
@@ -361,7 +361,7 @@ def post(self, request):
     return Response({"token": make_token(user)})
 ```
 
-##### Serializer - PUT
+### Serializer - PUT
 
 The `PUT` method is used to fully replace an existing resource.
 
@@ -383,7 +383,7 @@ def put(self, request):
     return Response({"status": "updated"})
 ```
 
-##### Serializer - PATCH
+### Serializer - PATCH
 
 The `PATCH` method is used for partial updates to a resource.
 
@@ -405,7 +405,7 @@ def patch(self, request):
     return Response({"status": "settings updated"})
 ```
 
-##### Serializer - DELETE
+### Serializer - DELETE
 
 The `DELETE` method is used to **remove a resource**. Usually, no serializer is needed.
 
