@@ -1,5 +1,5 @@
 # Use the official Python image as a base image
-FROM python:3.9
+FROM python:3.12
 
 # Prevents Python from writing pyc files to disc (equivalent to python -B option)
 ENV PYTHONDONTWRITEBYTECODE 1

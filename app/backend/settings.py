@@ -106,18 +106,6 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-"""
-When running test we do not want to connect to our database server. Instead, we want
-to run tests locally using SQLite3. This is because SQLite3 is acceptable for local
-development using low amounts of user data. This is ideal as it allows us to run 
-our tests without requiring a database server to be running as SQLite3 will create a 
-local database using the `db.sqlite3` file.
-
-Our Django configuration parser will default to using SQLite3. This is ideal for
-local development, running Docker locally and also using GitHub Actions. Environment
-variables will be configured when connecting to a database server.
-"""
 DATABASES = {
     "default": {
         "ENGINE": django_configs.get("Database", "SQL_ENGINE"),

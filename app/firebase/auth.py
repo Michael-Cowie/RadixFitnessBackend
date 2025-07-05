@@ -28,36 +28,31 @@ if django_configs.get("Development", "USE_FIREBASE") == "True":
 
 class FirebaseAuthentication(BaseAuthentication):
     """
-    The client will send us an ID token, which is used to verify the request. We will
-    use Firebase authentication method to verify the token and extract the UID from it.
-
-    https://firebase.google.com/docs/auth/admin/verify-id-tokens#python
+    Verifies Firebase JWT tokens and authenticates users using Firebase UID.
+    Creates a Django user on first authentication if not already present.
     """
 
     def authenticate(self, request):
-        """
-        Returns a tuple of `(user, auth)` if the authentication succeeds, or `None` otherwise.
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return None  # Allow other authenticators to try
 
-        The `user` will be an instance of User, either retrieved or created if necessary.
-        The `auth` will be the UID retrieved from the Firebase JWT.
-
-        The returned values will also set these attributes on the request object when forwarded, i.e.
-        it can later be accessed via `request.user` and `request.uid` when forwarded to the Views.
-        """
-        firebase_token = request.headers.get("Authorization")
-        if not firebase_token:
-            return None
         try:
-            decoded_token = auth.verify_id_token(firebase_token)
-            firebase_uid = decoded_token["uid"]
-
-            firebase_user_exists = Firebase.objects.filter(uid=firebase_uid).exists()
-            if firebase_user_exists:
-                firebase_user = Firebase.objects.get(uid=firebase_uid)
-                user = User.objects.get(id=firebase_user.user_id.id)
-            else:
-                user = User.objects.create(username=firebase_uid)
-                Firebase.objects.create(uid=firebase_uid, user_id=user)
-            return user, firebase_uid
+            decoded_token = auth.verify_id_token(auth_header.removeprefix("Bearer ").strip())
+        except auth.ExpiredIdTokenError:
+            raise AuthenticationFailed("Token has expired")
+        except auth.RevokedIdTokenError:
+            raise AuthenticationFailed("Token has been revoked")
         except auth.InvalidIdTokenError:
-            raise AuthenticationFailed("Token authentication failed")
+            raise AuthenticationFailed("Invalid authentication token")
+        except Exception as e:
+            raise AuthenticationFailed(f"Authentication failed: {str(e)}")
+
+        if firebase_uid := decoded_token.get("uid"):
+            firebase_user, _ = Firebase.objects.get_or_create(
+                uid=firebase_uid, defaults={"user_id": User.objects.create_user(username=firebase_uid)}
+            )
+
+            return firebase_user.user_id, decoded_token
+        else:
+            raise AuthenticationFailed("Invalid token payload: UID missing")

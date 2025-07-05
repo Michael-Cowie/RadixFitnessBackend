@@ -6,7 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models import FoodEntryTracking
+from ..models import FoodEntry
+from ..urls import FOOD_ENTRIES_NAME
 
 
 class FoodEntryTrackingViewTestCase(TestCase):
@@ -14,7 +15,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
     def setUpTestData(cls):
         cls.user = User.objects.create(id=1)
         cls.content_type = "application/json"
-        cls.url = reverse("food-entries")
+        cls.url = reverse(FOOD_ENTRIES_NAME)
         cls.test_data = {
             "user_id": cls.user,
             "date": "2024-09-01",
@@ -30,7 +31,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-        self.food_entry = FoodEntryTracking.objects.create(**self.test_data)
+        self.food_entry = FoodEntry.objects.create(**self.test_data)
 
     def test_get_food_entries_by_date(self):
         response = self.client.get(self.url, {"date": self.test_data["date"]})
@@ -48,7 +49,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
     def test_get_food_entries_by_date_no_date(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Date parameter is required.")
+        self.assertEqual(response.data["date"][0], 'This field is required.')
 
     def test_get_food_entries_by_date_not_found(self):
         response = self.client.get(self.url, {"date": "2024-09-02"})
@@ -84,7 +85,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data=json.dumps(new_entry), content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Date parameter is required.")
+        self.assertEqual(response.data['date'][0], 'This field is required.')
 
     def test_patch_food_entry(self):
         updated_entry = {"total_calories": 700, "total_protein": 50}
@@ -102,7 +103,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
         updated_entry = {"total_calories": 700, "total_protein": 50}
         response = self.client.patch(self.url, data=json.dumps(updated_entry), content_type=self.content_type)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Entry ID is required.")
+        self.assertEqual(response.data["id"][0], 'This field is required.')
 
     def test_patch_food_entry_not_found(self):
         updated_entry = {"total_calories": 700, "total_protein": 50}
@@ -110,7 +111,7 @@ class FoodEntryTrackingViewTestCase(TestCase):
             self.url, data=json.dumps(updated_entry), content_type=self.content_type, QUERY_STRING="id=999"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data["detail"], "Entry not found.")
+        self.assertEqual(response.data["detail"], 'Not found.')
 
     def test_delete_food_entry(self):
         response = self.client.delete(self.url, QUERY_STRING="id={}".format(self.food_entry.id))
@@ -119,19 +120,19 @@ class FoodEntryTrackingViewTestCase(TestCase):
     def test_delete_food_entry_no_id(self):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data["detail"], "Entry ID is required.")
+        self.assertEqual(response.data["id"][0], 'This field is required.')
 
     def test_delete_food_entry_not_found(self):
         response = self.client.delete(self.url, QUERY_STRING="id=999")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data["detail"], "Entry not found.")
+        self.assertEqual(response.data["detail"], 'Not found.')
 
     def test_delete_food_entry_with_another_users_id(self):
         another_user = User.objects.create(id=2, username="Hacker")
         self.client.force_authenticate(user=another_user)
 
-        test_user_row = FoodEntryTracking.objects.all()[0].id
+        test_user_row = FoodEntry.objects.all()[0].id
 
         response = self.client.delete(self.url, QUERY_STRING=f"id={ test_user_row }")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data["detail"], "Entry not found.")
+        self.assertEqual(response.data["detail"], 'Not found.')

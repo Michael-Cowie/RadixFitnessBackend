@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from ..models import DailyIntakeTracking
+from ..models import DailyMacronutrientGoal
 
 
 class DailyIntakeTrackingTest(TestCase):
@@ -23,7 +23,7 @@ class DailyIntakeTrackingTest(TestCase):
         and all fields are accurately set. The test verifies that the values assigned
         during creation match the expected values.
         """
-        daily_intake = DailyIntakeTracking.objects.create(
+        daily_intake = DailyMacronutrientGoal.objects.create(
             user_id=self.user,
             date=date.today(),
             goal_calories=2500,
@@ -47,7 +47,7 @@ class DailyIntakeTrackingTest(TestCase):
         When attempting to create a second DailyIntakeTracking instance for the same
         user on the same date, a ValidationError should be raised.
         """
-        DailyIntakeTracking.objects.create(
+        DailyMacronutrientGoal.objects.create(
             user_id=self.user,
             date=date.today(),
             goal_calories=2500,
@@ -57,7 +57,7 @@ class DailyIntakeTrackingTest(TestCase):
         )
 
         with self.assertRaises(ValidationError):
-            duplicate_entry = DailyIntakeTracking(
+            duplicate_entry = DailyMacronutrientGoal(
                 user_id=self.user,
                 date=date.today(),
                 goal_calories=2300,
@@ -76,7 +76,7 @@ class DailyIntakeTrackingTest(TestCase):
         ValidationError is raised. This test uses the full_clean() method to manually
         trigger model validation.
         """
-        daily_intake = DailyIntakeTracking(
+        daily_intake = DailyMacronutrientGoal(
             user_id=self.user,
             date=date.today(),
             goal_calories=6000,  # Invalid value, exceeds maximum allowed
@@ -96,7 +96,7 @@ class DailyIntakeTrackingTest(TestCase):
         goal_calories field is below the minimum allowed value of 0, a ValidationError
         is raised. This test also uses the full_clean() method to manually trigger model validation.
         """
-        daily_intake = DailyIntakeTracking(
+        daily_intake = DailyMacronutrientGoal(
             user_id=self.user,
             date=date.today(),
             goal_calories=-100,  # Invalid value, below minimum allowed
@@ -114,7 +114,7 @@ class DailyIntakeTrackingTest(TestCase):
         instance is formatted correctly and includes all relevant information about
         the user's daily intake and goals.
         """
-        daily_intake = DailyIntakeTracking.objects.create(
+        daily_intake = DailyMacronutrientGoal.objects.create(
             user_id=self.user,
             date=date.today(),
             goal_calories=2500,

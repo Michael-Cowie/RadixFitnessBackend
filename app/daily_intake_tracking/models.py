@@ -6,7 +6,7 @@ MACRO_NUTRIENTS = ["calories", "protein", "carbs", "fats"]
 GOAL_COLUMNS = [f"goal_{macro_nutrient}" for macro_nutrient in MACRO_NUTRIENTS]
 
 
-class DailyIntakeTracking(models.Model):
+class DailyMacronutrientGoal(models.Model):
     class Meta:
         unique_together = (
             "date",
@@ -33,7 +33,7 @@ class DailyIntakeTracking(models.Model):
 """
 
 
-class FoodEntryTracking(models.Model):
+class FoodEntry(models.Model):
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import GOAL_COLUMNS, DailyIntakeTracking, FoodEntryTracking
+from .models import GOAL_COLUMNS, DailyMacronutrientGoal, FoodEntry
 
 
 class DailyIntakeTrackingAdmin(admin.ModelAdmin):
@@ -21,5 +21,5 @@ class FoodEntryTrackingAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(DailyIntakeTracking, DailyIntakeTrackingAdmin)
-admin.site.register(FoodEntryTracking, FoodEntryTrackingAdmin)
+admin.site.register(DailyMacronutrientGoal, DailyIntakeTrackingAdmin)
+admin.site.register(FoodEntry, FoodEntryTrackingAdmin)

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from ..models import FoodEntryTracking
+from ..models import FoodEntry
 
 
 class FoodEntryTrackingTestCase(TestCase):
@@ -32,10 +32,10 @@ class FoodEntryTrackingTestCase(TestCase):
         ]
 
     def setUp(self):
-        self.food_entries = [FoodEntryTracking.objects.create(**entry) for entry in self.test_data]
+        self.food_entries = [FoodEntry.objects.create(**entry) for entry in self.test_data]
 
     def test_food_entry_creation(self):
-        entries = FoodEntryTracking.objects.filter(user_id=self.user, date="2024-09-01")
+        entries = FoodEntry.objects.filter(user_id=self.user, date="2024-09-01")
         for entry, data in zip(entries, self.test_data):
             self.assertEqual(entry.user_id, data["user_id"])
             self.assertEqual(entry.date.isoformat(), data["date"])
