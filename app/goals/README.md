@@ -30,4 +30,4 @@ This clear separation ensures that:
 
 - Add support for **non-nutrition goals**, such as sleep or exercise
 
-*Base API Path:** - `/api/v1/goals/`
+**Base API Path:** - `/api/v1/goals/`
