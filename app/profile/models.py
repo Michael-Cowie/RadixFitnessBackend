@@ -12,10 +12,10 @@ class Units(models.TextChoices):
 
 
 class Profile(models.Model):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
+
     name = models.TextField(validators=[alpha])
     measurement_system = models.CharField(choices=Units.choices, max_length=8)
-
-    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

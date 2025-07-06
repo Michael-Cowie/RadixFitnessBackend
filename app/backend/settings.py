@@ -45,11 +45,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     # My Apps
-    "profile",
-    "weights",
     "firebase",
-    "daily_intake_tracking",
     "fooddata_central_service",
+    "goals",
+    "intake",
+    "measurements",
+    "profile",
 ]
 
 REST_FRAMEWORK = {

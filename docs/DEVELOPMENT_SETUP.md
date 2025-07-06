@@ -83,3 +83,13 @@ Django settings needs to be properly configured in order to run tests and make s
 <div align="center">
     <img src="images/django_settings.png"/>
 </div>
+
+## 8. Automatic Code Formatting
+
+The script `format_code.cmd` will automatically activate the local virtual environment in order to run the correct `python` interpreter with `black` and `isort` as dependencies. For now, this runs over the entire repository, but due to the current small size, it is currently acceptable. 
+
+To configure this to run automatically when saving, PyCharm allows for the `File Watchers` to be configured shown below.
+
+<div align="center">
+    <img src="images/code_formatting.png"/>
+</div>

@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -6,7 +7,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Profile
-from .serializers import ProfileNoContent, ProfileRequest, ProfileResponse
+from .serializers import (
+    ProfileNoContentSerializer,
+    ProfileRequestSerializer,
+    ProfileResponseSerializer,
+)
 
 
 def _get_profile_for_user(user):
@@ -19,67 +24,39 @@ def _get_profile_for_user(user):
 class ProfileView(APIView):
 
     @swagger_auto_schema(
-        request_body=ProfileRequest,
-        responses={
-            "201": openapi.Response(
-                description="Successfully created a profile for the user",
-                schema=ProfileResponse,
-            ),
-            "400": "Unable to create profile",
-        },
+        request_body=ProfileRequestSerializer,
+        responses={201: ProfileResponseSerializer, 400: "Bad Request"},
     )
     def post(self, request):
-        """
-        Create a UserProfile and add it to the database.
-        """
-        request_serializer = ProfileRequest(data=request.data)
-        if request_serializer.is_valid():
-            response_data = request.data | {"user_id": request.user.id}
-            response_serializer = ProfileResponse(data=response_data)
-            if response_serializer.is_valid():
-                response_serializer.save()
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get(self, request):
-        """
-        Get a profile for the logged-in user.
-        """
-        user_profile = _get_profile_for_user(request.user)
-        serializer = ProfileResponse(user_profile)
-        return Response(serializer.data)
+        serializer = ProfileRequestSerializer(data=request.data, context={"user": request.user})
+        serializer.is_valid(raise_exception=True)
+        profile = serializer.save()
+        return Response(ProfileResponseSerializer(profile).data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
-        request_body=ProfileRequest,
-        responses={
-            "200": openapi.Response(
-                description="Successfully updated a profile for the user",
-                schema=ProfileResponse,
-            ),
-            "400": "Unable to update profile",
-        },
+        responses={200: ProfileResponseSerializer, 404: "Profile not found"},
+    )
+    def get(self, request):
+        profile = get_object_or_404(Profile, user_id=request.user)
+        return Response(ProfileResponseSerializer(profile).data)
+
+    @swagger_auto_schema(
+        request_body=ProfileRequestSerializer,
+        responses={200: ProfileResponseSerializer, 400: "Bad Request"},
     )
     def patch(self, request):
-        """
-        Updates an existing UserProfile from the provided request data.
-        """
-        user_profile = _get_profile_for_user(request.user)
-        request_serializer = ProfileRequest(user_profile, data=request.data, partial=True)
-        if request_serializer.is_valid():
-            response_serializer = ProfileResponse(user_profile, request.data, partial=True)
-            if response_serializer.is_valid():
-                response_serializer.save()
-            return Response(response_serializer.data, status=status.HTTP_200_OK)
-        return Response(request_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        profile = get_object_or_404(Profile, user_id=request.user)
+        serializer = ProfileRequestSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        profile = serializer.save()
+        return Response(ProfileResponseSerializer(profile).data)
 
     @swagger_auto_schema(
-        request_body=ProfileNoContent,
-        responses={"204": openapi.Response(description="Successfully deleted the profile", schema=ProfileNoContent)},
+        request_body=ProfileNoContentSerializer,
+        responses={204: "Successfully deleted"},
     )
     def delete(self, request):
-        """
-        Delete a UserProfile.
-        """
-        user_profile = _get_profile_for_user(request.user)
-        user_profile.delete()
+        profile = get_object_or_404(Profile, user_id=request.user)
+        profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
