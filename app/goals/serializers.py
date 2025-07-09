@@ -30,17 +30,16 @@ class DailyMacronutrientGoalQuerySerializer(Serializer):
     date = DateField()
 
 
-class DailyMacronutrientGoalResponseSerializer(Serializer):
+class DailyMacronutrientGoalResponseSerializer(ModelSerializer):
     """
     Serializer to output the daily macronutrient goal data for a user.
-    Pure output serializer - no validation or saving logic.
+    Read-only serializer - no validation or saving logic.
     """
 
-    date = DateField()
-    goal_calories = DecimalField(max_digits=6, decimal_places=2)
-    goal_protein = DecimalField(max_digits=6, decimal_places=2)
-    goal_carbs = DecimalField(max_digits=6, decimal_places=2)
-    goal_fats = DecimalField(max_digits=6, decimal_places=2)
+    class Meta:
+        model = DailyMacronutrientGoal
+        fields = ("date", *GOAL_COLUMNS)
+        read_only_fields = fields
 
 
 class WeightGoalRequestSerializer(ModelSerializer):
@@ -63,3 +62,4 @@ class WeightGoalResponseSerializer(ModelSerializer):
     class Meta:
         model = WeightGoal
         fields = ("goal_date", "goal_weight_kg")
+        read_only_fields = fields

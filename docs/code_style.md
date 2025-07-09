@@ -220,6 +220,34 @@ class WeightEntryRequestSerializer(serializers.ModelSerializer):
         return WeightEntry.objects.create(user=self.context["user"], **validated_data)
 ```
 
+### Response ModelSerializer
+
+Response serializers are used to format model data for output, commonly in GET requests. When building response-only serializers, we need to maintain a balance of maintainability and safety.
+
+When using a `Serializer` with manually declared fields this leads to duplication,
+
+- Requires replicating model field types, constraints and naming.
+- Becomes difficult to keep in sync with model changes.
+- Introduces risk of stale or incorrect representations.
+
+Using `ModelSerializer` auto-generates fields from the model, keeping serializers synchronized.
+
+- Reduces boilerplate.
+- Tracks model changes automatically.
+- Preferred for large or evolving schemas.
+
+`ModelSerializer` also enables write access by default. If a response serializer is mistakenly used in a POST or PUT it may modify sensitive fields. Therefore, it's essential mark all fields as read only.
+
+```python
+class ProfileResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['id', 'username', 'bio', 'created_at']
+        read_only_fields = fields
+```
+
+This will prevent accidental misuse for a response based serializer from accidentally changing data in the model.
+
 ### ModelSerializer - GET
 
 The `GET` method is used to **retrieve data**, typically for,

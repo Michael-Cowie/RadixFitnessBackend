@@ -13,7 +13,7 @@ class WeightEntryResponseSerializer(ModelSerializer):
     class Meta:
         model = WeightEntry
         fields = ("user", "date", "weight_kg", "notes")
-        read_only_fields = ("user",)
+        read_only_fields = fields
 
 
 class WeightEntryDateSerializer(Serializer):
