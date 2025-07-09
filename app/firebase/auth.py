@@ -5,7 +5,7 @@ from firebase_admin import auth, credentials
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from .models import Firebase
+from .models import FirebaseUser
 
 if django_configs.get("Development", "USE_FIREBASE") == "True":
     certificate = {
@@ -50,13 +50,13 @@ class FirebaseAuthentication(BaseAuthentication):
 
         if firebase_uid := decoded_token.get("uid"):
             try:
-                firebase_user = Firebase.objects.get(uid=firebase_uid)
-            except Firebase.DoesNotExist:
+                firebase_user = FirebaseUser.objects.get(uid=firebase_uid)
+            except FirebaseUser.DoesNotExist:
                 # Create the user first
                 user = User.objects.create_user(username=firebase_uid)
-                # Then create the Firebase object with user_id
-                firebase_user = Firebase.objects.create(uid=firebase_uid, user_id=user)
+                # Then create the Firebase object with user
+                firebase_user = FirebaseUser.objects.create(uid=firebase_uid, user=user)
 
-            return firebase_user.user_id, decoded_token
+            return firebase_user.user, decoded_token
         else:
             raise AuthenticationFailed("Invalid token payload: UID missing")

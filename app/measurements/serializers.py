@@ -8,15 +8,12 @@ class WeightEntryRequestSerializer(ModelSerializer):
         model = WeightEntry
         fields = ("date", "weight_kg", "notes")
 
-    def create(self, validated_data):
-        return WeightEntry.objects.create(user_id=self.context["user"], **validated_data)
-
 
 class WeightEntryResponseSerializer(ModelSerializer):
     class Meta:
         model = WeightEntry
-        fields = ("id", "user_id", "date", "weight_kg", "notes")
-        read_only_fields = ("id", "user_id")
+        fields = ("user", "date", "weight_kg", "notes")
+        read_only_fields = ("user",)
 
 
 class WeightEntryDateSerializer(Serializer):

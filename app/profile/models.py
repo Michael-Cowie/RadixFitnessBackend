@@ -3,7 +3,10 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-alpha = RegexValidator(r"^[a-zA-Z]+$", "Only alpha characters of length 1 or more are accepted")
+alpha = RegexValidator(
+    regex=r"^[a-zA-Z]+$",
+    message="Only alphabetic characters are allowed.",
+)
 
 
 class Units(models.TextChoices):
@@ -12,9 +15,9 @@ class Units(models.TextChoices):
 
 
 class Profile(models.Model):
-    user_id = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
-    name = models.TextField(validators=[alpha])
+    name = models.CharField(max_length=100, validators=[alpha])
     measurement_system = models.CharField(choices=Units.choices, max_length=8)
 
     def __str__(self):

@@ -2,7 +2,9 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-class Firebase(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+class FirebaseUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    uid = models.CharField(max_length=64, unique=True)
 
-    uid = models.TextField(unique=True)
+    def __str__(self):
+        return f"{self.user} → {self.uid}"

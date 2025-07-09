@@ -18,48 +18,25 @@ class WeightsView(APIView):
     @swagger_auto_schema(
         request_body=WeightEntryRequestSerializer,
         responses={
-            201: openapi.Response(
-                description="Successfully created a weight entry",
+            200: openapi.Response(
+                description="Successfully created or updated a weight entry",
                 schema=WeightEntryResponseSerializer,
             ),
-            400: "Invalid data to create Weight entry",
+            400: "Invalid data to create or update Weight entry",
         },
     )
-    def post(self, request):
-        """Create a weight entry for a particular date."""
-        serializer = WeightEntryRequestSerializer(data=request.data, context={"user": request.user})
+    def put(self, request):
+        """Create or update a weight entry for a particular date."""
+        serializer = WeightEntryRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        weight_entry = serializer.save()
+
+        weight_entry, created = WeightEntry.objects.update_or_create(
+            user=request.user,
+            date=serializer.validated_data["date"],
+            defaults=serializer.validated_data,
+        )
 
         response_serializer = WeightEntryResponseSerializer(weight_entry)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
-    @swagger_auto_schema(
-        request_body=WeightEntryRequestSerializer,
-        responses={
-            200: openapi.Response(
-                description="Successfully updated the weight",
-                schema=WeightEntryResponseSerializer,
-            ),
-            400: "Invalid data to update a Weight entry",
-            404: "Weight entry not found",
-        },
-    )
-    def patch(self, request):
-        """Update an existing weight entry for a particular date."""
-        date_serializer = WeightEntryDateSerializer(data=request.data)
-        date_serializer.is_valid(raise_exception=True)
-
-        serializer = WeightEntryRequestSerializer(
-            get_object_or_404(WeightEntry, user_id=request.user, date=date_serializer.validated_data["date"]),
-            data=request.data,
-            partial=True,
-            context={"user": request.user},
-        )
-        serializer.is_valid(raise_exception=True)
-        updated_entry = serializer.save()
-
-        response_serializer = WeightEntryResponseSerializer(updated_entry)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -75,7 +52,7 @@ class WeightsView(APIView):
         serializer = WeightEntryDateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        weight_entry = get_object_or_404(WeightEntry, user_id=request.user, date=serializer.validated_data["date"])
+        weight_entry = get_object_or_404(WeightEntry, user=request.user, date=serializer.validated_data["date"])
         weight_entry.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -91,6 +68,6 @@ class AllWeightsView(APIView):
     )
     def get(self, request):
         """Return all weight entries for the authenticated user, ordered by date descending."""
-        weights = WeightEntry.objects.filter(user_id=request.user).order_by("-date")
+        weights = WeightEntry.objects.filter(user=request.user)
         serializer = WeightEntryResponseSerializer(weights, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

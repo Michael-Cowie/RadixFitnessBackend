@@ -24,7 +24,7 @@ class DailyIntakeTrackingTest(TestCase):
         during creation match the expected values.
         """
         daily_intake = DailyMacronutrientGoal.objects.create(
-            user_id=self.user,
+            user=self.user,
             date=date.today(),
             goal_calories=2500,
             goal_protein=200,
@@ -32,7 +32,7 @@ class DailyIntakeTrackingTest(TestCase):
             goal_fats=80,
         )
 
-        self.assertEqual(daily_intake.user_id, self.user)
+        self.assertEqual(daily_intake.user, self.user)
         self.assertEqual(daily_intake.date, date.today())
         self.assertEqual(daily_intake.goal_calories, 2500)
         self.assertEqual(daily_intake.goal_protein, 200)
@@ -41,14 +41,14 @@ class DailyIntakeTrackingTest(TestCase):
 
     def test_unique_together_constraint(self):
         """
-        Test the unique together constraint on the date and user_id fields.
+        Test the unique together constraint on the date and user fields.
 
-        This test ensures that the unique constraint on the date and user_id fields is enforced.
+        This test ensures that the unique constraint on the date and user fields is enforced.
         When attempting to create a second DailyIntakeTracking instance for the same
         user on the same date, a ValidationError should be raised.
         """
         DailyMacronutrientGoal.objects.create(
-            user_id=self.user,
+            user=self.user,
             date=date.today(),
             goal_calories=2500,
             goal_protein=200,
@@ -58,14 +58,14 @@ class DailyIntakeTrackingTest(TestCase):
 
         with self.assertRaises(ValidationError):
             duplicate_entry = DailyMacronutrientGoal(
-                user_id=self.user,
+                user=self.user,
                 date=date.today(),
                 goal_calories=2300,
                 goal_protein=190,
                 goal_carbs=330,
                 goal_fats=75,
             )
-            duplicate_entry.full_clean()  # This will trigger the unique constraint validation
+            duplicate_entry.full_clean()
 
     def test_max_value_validation(self):
         """
@@ -77,9 +77,9 @@ class DailyIntakeTrackingTest(TestCase):
         trigger model validation.
         """
         daily_intake = DailyMacronutrientGoal(
-            user_id=self.user,
+            user=self.user,
             date=date.today(),
-            goal_calories=6000,  # Invalid value, exceeds maximum allowed
+            goal_calories=6000,
             goal_protein=200,
             goal_carbs=350,
             goal_fats=80,
@@ -97,9 +97,9 @@ class DailyIntakeTrackingTest(TestCase):
         is raised. This test also uses the full_clean() method to manually trigger model validation.
         """
         daily_intake = DailyMacronutrientGoal(
-            user_id=self.user,
+            user=self.user,
             date=date.today(),
-            goal_calories=-100,  # Invalid value, below minimum allowed
+            goal_calories=-100,
             goal_protein=200,
             goal_carbs=350,
             goal_fats=80,
@@ -115,7 +115,7 @@ class DailyIntakeTrackingTest(TestCase):
         the user's daily intake and goals.
         """
         daily_intake = DailyMacronutrientGoal.objects.create(
-            user_id=self.user,
+            user=self.user,
             date=date.today(),
             goal_calories=2500,
             goal_protein=200,
@@ -125,10 +125,9 @@ class DailyIntakeTrackingTest(TestCase):
         expected_str = f"""
         On {daily_intake.date} you have have the following goals,
 
-        - Goal calories {daily_intake.goal_calories}
-        - Goal protein {daily_intake.goal_protein}
-        - Goal carbs {daily_intake.goal_carbs}
-        - Goal fats {daily_intake.goal_fats}
+        - Goal calories {daily_intake.goal_calories}kcal
+        - Goal protein {daily_intake.goal_protein}g
+        - Goal carbs {daily_intake.goal_carbs}g
+        - Goal fats {daily_intake.goal_fats}g
 """
-        # Assert that the __str__ method returns the expected string
         self.assertEqual(str(daily_intake).strip(), expected_str.strip())

@@ -5,12 +5,14 @@ from django.db import models
 
 class WeightEntry(models.Model):
     class Meta:
-        unique_together = (
-            "date",
-            "user_id",
-        )  # Do not allow multiple weight entries for the same day.
+        unique_together = ("date", "user")
+        indexes = [
+            models.Index(fields=["user", "date"]),
+        ]
 
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+        ordering = ["-date"]  # most recent entries first
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     date = models.DateField()
     """
@@ -31,7 +33,7 @@ class WeightEntry(models.Model):
     it to the user on the UI.
     """
     weight_kg = models.FloatField(validators=[MinValueValidator(1)])
-    notes = models.CharField(max_length=255, default="", blank=True)
+    notes = models.TextField(blank=True, default="")
 
     def __str__(self):
         return f"On {self.date}, you weighed {self.weight_kg}kg"

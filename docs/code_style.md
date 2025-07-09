@@ -71,6 +71,71 @@ serializer.is_valid(raise_exception=True)
 user = serializer.save()
 ```
 
+## Serializer Inputs
+
+DRF serializers accept two primary parameters that determine their operational mode,
+
+1. `instance` - Converts model instances to JSON (Serialization).
+2. `data` - Validates incoming JSON data (Deserialization).
+3. **Both** - Updates existing instances with new data.
+
+#### Instance Parameter
+
+The purpose of inputting only the `instance` parameter is to perform the conversion **from a Django model instance to a JSON representation** for API responses.
+
+This will be primarily used for GET endpoints, response formatting and data transformation. This type of transformation is read-only, performs **no validation** and accessed via `serializer.data`.
+
+```python
+# Single instance
+user = User.objects.get(id=1)
+serializer = UserSerializer(user)
+json_output = serializer.data
+
+# Multiple instances
+users = User.objects.all()
+serializer = UserSerializer(users, many=True)
+json_output = serializer.data
+```
+
+#### Data Parameter
+
+The purpose of inputting only `data` into a serializer **is to perform the conversion of JSON data into a Django model instance**. This will perform model validation and processing.
+
+This is primarily used for POST endpoints. It will perform **input validation** and resource creation. You must call `is_valid()` and access the data via `serializer.validated_data`. 
+
+There are multiple patterns for passing the `data` pattern such as,
+
+1. **Validation and Automatic Save**
+
+```python
+serializer = UserSerializer(data=request.data)
+serializer.is_valid(raise_exception=True)
+user = serializer.save()
+```
+
+2. **Validation and Manual Processing**
+
+```python
+serializer = UserSerializer(data=request.data)
+serializer.is_valid(raise_exception=True)
+
+user, created = User.objects.update_or_create(
+    email=serializer.validated_data['email'],
+    defaults=serializer.validated_data
+)
+```
+
+#### Combined Usage
+
+The purpose of passing both an instance with data, is to **update existing instances with validated data**. This will primarily to be used for PUT/PATCH for resource updating. For `patch`, you would need to pass `partial=True` to the serializer.
+
+```python
+user = User.objects.get(id=1)
+serializer = UserSerializer(user, data=request.data)
+if serializer.is_valid():
+    updated_user = serializer.save()
+```
+
 ## Model Serializers
 
 `ModelSerializer` is a subclass of `Serializer` that automatically generates fields from a Django model. It simplifies the creation
@@ -96,6 +161,64 @@ Use the naming convention `<ModelName><Purpose>Serializer`
 | Update - PUT/PATCH  | `BookUpdateSerializer`          | PUT, PATCH  | Update existing objects                    |
 | Create or Update    | `BookUpsertSerializer`          | PUT         | For `update_or_create` semantics          |
 | Partial Update      | `BookPartialUpdateSerializer`   | PATCH       | Partial updates, fewer required fields    |
+
+### ModelSerializer Database Level Validation
+
+While `ModelSerializer` automatically performs field-level validation (e.g. required fields, max length and types), however it **does not automatically validate model-level constraints** such as,
+
+- `unique_together`
+- `UniqueConstraint`
+- ...
+
+These constraints are enforced **only at the database level**, meaning `serializer.is_valid()` will **still pass** even if the input would violate them. This can result in `IntegrityError` when `serializer.save()` is called. **You must manually validate these constraints at the serializer level**.
+
+**Definition**
+
+This model ensures that each user can only have one weight entry per day, **enforced at the database level**.
+
+```python
+class WeightEntry(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField()
+    weight_kg = models.FloatField(validators=[MinValueValidator(1)])
+    notes = models.TextField(blank=True, default="")
+
+    class Meta:
+        unique_together = ("date", "user")
+```
+
+**Serializer Definition**
+
+```python
+class WeightEntryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeightEntry
+        fields = ("date", "weight_kg", "notes")
+
+    def create(self, validated_data):
+        return WeightEntry.objects.create(user=self.context["user"], **validated_data)
+```
+
+This serializer **does not check for duplicates**. A second POST with the same `user` and `date` would pass `.is_valid()` but crash on `.save()` with a `django.db.IntegrityError`. To implement the correct serializer of this, we need to add manual uniqueness validation.
+
+```python
+class WeightEntryRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WeightEntry
+        fields = ("date", "weight_kg", "notes")
+
+    def validate(self, attrs):
+        user = self.context["user"]
+        date = attrs["date"]
+
+        if WeightEntry.objects.filter(user=user, date=date).exists():
+            raise serializers.ValidationError("You already have a weight entry for this date.")
+
+        return attrs
+
+    def create(self, validated_data):
+        return WeightEntry.objects.create(user=self.context["user"], **validated_data)
+```
 
 ### ModelSerializer - GET
 
@@ -173,6 +296,26 @@ class DailyLog(models.Model):
 Each user can only have one `DailyLog` per day.
 
 **Serializer**
+
+`DailyLogSerializer` is a `ModelSerializer` used to create or update `DailyLog` entries associated with a specific user and date. It encapsulates the logic for conditionally or updating a record, based on the uniqueness constraint defined in the `DailyLog` model.
+
+The Django model constraint,
+
+```python
+class Meta:
+    unique_together = ("user", "date")
+```
+
+only enforces uniqueness at the **database level**, they do not prevent a serializer attempting to create duplicate entries. Without custom logic in the serializer, using `is_valid()` followed by `.save()` could cause a `django.db.IntegrityError` if a duplicate `DailyLog` already exists.
+
+To prevent this, we override the `create()` method to ensure that either a new entry is created or an existing entry is updated - **without violating model constraints**.
+
+The `create(self, validated_data)` is invoked when `.save()` is called on the serializer. It is **not bound to an instance**.
+
+The `update(self, instance, validated_data)` is invoked when `.save()` is called on a serializer **bound to an existing instance**. 
+
+`update()` will be primarily called using `PUT` and `PATCH` whereas `create()` will be primarily used for `POST`.
+
 ```python
 from rest_framework import serializers
 from .models import DailyLog

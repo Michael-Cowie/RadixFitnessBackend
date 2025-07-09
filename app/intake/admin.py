@@ -6,7 +6,7 @@ from .models import FoodEntry
 class FoodEntryTrackingAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "user_id",
+        "user",
         "date",
         "food_name",
         "total_calories",

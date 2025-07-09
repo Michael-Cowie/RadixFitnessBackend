@@ -11,39 +11,18 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("auth", "0012_alter_user_first_name_max_length"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name="WeightGoal",
-            fields=[
-                (
-                    "user",
-                    models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        primary_key=True,
-                        serialize=False,
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                ("goal_date", models.DateField()),
-                (
-                    "goal_weight_kg",
-                    models.DecimalField(
-                        decimal_places=2, max_digits=5, validators=[django.core.validators.MinValueValidator(1)]
-                    ),
-                ),
-            ],
-        ),
-        migrations.CreateModel(
-            name="DailyMacronutrientGoal",
+            name="FoodEntry",
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("date", models.DateField()),
+                ("food_name", models.CharField(max_length=255)),
                 (
-                    "goal_calories",
+                    "total_calories",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=6,
@@ -54,7 +33,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "goal_protein",
+                    "total_protein",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=6,
@@ -65,7 +44,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "goal_carbs",
+                    "total_fats",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=6,
@@ -76,7 +55,18 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "goal_fats",
+                    "total_carbs",
+                    models.DecimalField(
+                        decimal_places=2,
+                        max_digits=6,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(5000),
+                        ],
+                    ),
+                ),
+                (
+                    "food_weight",
                     models.DecimalField(
                         decimal_places=2,
                         max_digits=6,
@@ -90,8 +80,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "ordering": ["-date"],
-                "indexes": [models.Index(fields=["user", "date"], name="goals_daily_user_id_69296b_idx")],
-                "unique_together": {("date", "user")},
+                "indexes": [models.Index(fields=["user", "date"], name="intake_food_user_id_9b1c18_idx")],
             },
         ),
     ]

@@ -1,4 +1,5 @@
 import json
+from profile.models import Profile
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -6,103 +7,97 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ..models import Profile
-
 
 class ProfileViewTest(TestCase):
-
     @classmethod
     def setUpTestData(cls):
-        User.objects.create(id=1, username="Test User")
+        cls.user = User.objects.create_user(username="testuser")
 
     def setUp(self):
-        self.user = User.objects.get(id=1)
-
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-        self.content_type = "application/json"
         self.test_url = reverse("profile")
+        self.content_type = "application/json"
+        self.default_data = {
+            "name": "Michael",
+            "measurement_system": "Metric",
+        }
 
-        self.default_unit = "Metric"
-        self.data_name = "Michael"
-        self.data = json.dumps({"name": self.data_name, "measurement_system": self.default_unit})
-
-    def test_create_profile(self):
-        # 1. Send a POST to create the profile
-        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+    def test_create_profile_success(self):
+        response = self.client.post(
+            self.test_url,
+            data=json.dumps(self.default_data),
+            content_type=self.content_type,
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        profile_id = response.data["id"]
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.name, self.default_data["name"])
+        self.assertEqual(profile.measurement_system, self.default_data["measurement_system"])
 
-        # 2. Validate it was populated in the model with the correct data inside the http body
-        created_profile = Profile.objects.get(id=profile_id)
-        self.assertEqual(created_profile.name, self.data_name)
-        self.assertEqual(created_profile.measurement_system, self.default_unit)
-        self.assertEqual(created_profile.user_id, self.user)
-
-    def test_creation_error_throws_error(self):
-        # 1. Send a POST to create the profile with incorrect data
-        self.data = json.dumps({"name": "Invalid 123"})
-        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+    def test_create_profile_invalid_data_returns_400(self):
+        invalid_data = {"name": "Invalid 123"}
+        response = self.client.post(
+            self.test_url,
+            data=json.dumps(invalid_data),
+            content_type=self.content_type,
+        )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_profile(self):
-        # 1. Create out test profile, that we will late fetch
-        test_name = "Michael"
-        Profile.objects.create(name=test_name, measurement_system=self.default_unit, user_id=self.user)
-
-        # 2. Send a GET and attempt to fetch the user profile
-        response = self.client.get(self.test_url)
-        self.assertEqual(response.data["name"], test_name)
-        self.assertEqual(response.data["user_id"], self.user.id)
-
-    def test_update_profile(self):
-        # 1. Create our test profile
-        test_name = "Michael"
-        profile = Profile.objects.create(name=test_name, measurement_system=self.default_unit, user_id=self.user)
-        self.assertEqual(profile.name, test_name)
-
-        # 2. Send a POST to update the user profile and validate that it has updated
-        new_name = "UpdatedName"
-        data = json.dumps({"name": new_name})
-        response = self.client.patch(self.test_url, data=data, content_type=self.content_type)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        profile_id = response.data["id"]
-
-        updated_profile = Profile.objects.get(id=profile_id)
-        self.assertEqual(updated_profile.name, new_name)
-
-    def test_partially_updating_profile(self):
-        # 1. Create our test profile
-        test_name = "Michael"
-        test_measurement_system = "Metric"
-        profile = Profile.objects.create(
-            name=test_name,
-            measurement_system=test_measurement_system,
-            user_id=self.user,
+    def test_get_profile_returns_correct_data(self):
+        Profile.objects.create(
+            name=self.default_data["name"],
+            measurement_system=self.default_data["measurement_system"],
+            user=self.user,
         )
-        self.assertEqual(profile.name, test_name)
-        self.assertEqual(profile.measurement_system, test_measurement_system)
-
-        # 2. Send a POST to update the preferred unit validate that it has updated
-        new_measurement_system = "Imperial"
-        data = json.dumps({"measurement_system": new_measurement_system})
-        response = self.client.patch(self.test_url, data=data, content_type=self.content_type)
+        response = self.client.get(self.test_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        profile_id = response.data["id"]
+        self.assertEqual(response.data["name"], self.default_data["name"])
+        self.assertEqual(response.data["user"], self.user.id)
 
-        updated_profile = Profile.objects.get(id=profile_id)
-        self.assertEqual(updated_profile.measurement_system, new_measurement_system)
+    def test_update_profile_name(self):
+        Profile.objects.create(
+            name=self.default_data["name"],
+            measurement_system=self.default_data["measurement_system"],
+            user=self.user,
+        )
+        new_name = "UpdatedName"
+        response = self.client.patch(
+            self.test_url,
+            data=json.dumps({"name": new_name}),
+            content_type=self.content_type,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_deleting_profile(self):
-        # 1. Create out test profile
-        test_name = "Michael"
-        Profile.objects.create(name=test_name, measurement_system=self.default_unit, user_id=self.user)
-        self.assertEqual(Profile.objects.filter().count(), 1)
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.name, new_name)
 
-        # 2. Send a DELETE to delete our profile and validate it's removed from the model
+    def test_partial_update_profile_measurement_system(self):
+        Profile.objects.create(
+            name=self.default_data["name"],
+            measurement_system=self.default_data["measurement_system"],
+            user=self.user,
+        )
+        new_system = "Imperial"
+        response = self.client.patch(
+            self.test_url,
+            data=json.dumps({"measurement_system": new_system}),
+            content_type=self.content_type,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.measurement_system, new_system)
+
+    def test_delete_profile_removes_instance(self):
+        Profile.objects.create(
+            name=self.default_data["name"],
+            measurement_system=self.default_data["measurement_system"],
+            user=self.user,
+        )
+        self.assertEqual(Profile.objects.count(), 1)
+
         response = self.client.delete(self.test_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        self.assertEqual(Profile.objects.filter().count(), 0)
+        self.assertEqual(Profile.objects.count(), 0)

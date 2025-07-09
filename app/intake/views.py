@@ -37,7 +37,7 @@ class FoodEntryView(APIView):
     def get(self, request):
         validated_query_params = self._validate_query_params(FoodEntryDateQuerySerializer, request)
 
-        entries = FoodEntry.objects.filter(user_id=request.user, date=validated_query_params["date"])
+        entries = FoodEntry.objects.filter(user=request.user, date=validated_query_params["date"])
         if not entries.exists():
             return Response({"detail": "No entries found for the given date."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -84,7 +84,7 @@ class FoodEntryView(APIView):
     def patch(self, request):
         validated_query_params = self._validate_query_params(FoodEntryIDQuerySerializer, request)
 
-        entry = get_object_or_404(FoodEntry, id=validated_query_params["id"], user_id=request.user)
+        entry = get_object_or_404(FoodEntry, id=validated_query_params["id"], user=request.user)
 
         serializer = FoodEntrySerializer(entry, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -106,6 +106,6 @@ class FoodEntryView(APIView):
     def delete(self, request):
         validated_query_params = self._validate_query_params(FoodEntryIDQuerySerializer, request)
 
-        entry = get_object_or_404(FoodEntry, id=validated_query_params["id"], user_id=request.user)
+        entry = get_object_or_404(FoodEntry, id=validated_query_params["id"], user=request.user)
         entry.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

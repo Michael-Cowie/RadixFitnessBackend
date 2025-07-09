@@ -10,7 +10,8 @@ from .serializers import (
     DailyMacronutrientGoalQuerySerializer,
     DailyMacronutrientGoalResponseSerializer,
     DailyMacronutrientGoalUpsertSerializer,
-    WeightGoalSerializer,
+    WeightGoalRequestSerializer,
+    WeightGoalResponseSerializer,
 )
 
 
@@ -19,34 +20,32 @@ class DailyMacronutrientGoalView(APIView):
     @swagger_auto_schema(
         request_body=DailyMacronutrientGoalUpsertSerializer,
         responses={
-            "200": openapi.Response(
+            200: openapi.Response(
                 description="Successfully updated the food tracking entry",
+                schema=DailyMacronutrientGoalResponseSerializer,
             ),
-            "201": openapi.Response(
+            201: openapi.Response(
                 description="Successfully created a food tracking entry",
+                schema=DailyMacronutrientGoalResponseSerializer,
             ),
-            "400": "Invalid data for food tracking entry",
+            400: "Invalid data for food tracking entry",
         },
     )
     def put(self, request):
         """
         Create or update an entry to track daily macronutrient intake for a particular date.
-        If an entry for the specified date already exists, it will be updated; otherwise, a new entry will be created.
         """
         serializer = DailyMacronutrientGoalUpsertSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
 
         instance, created = DailyMacronutrientGoal.objects.update_or_create(
-            user_id=request.user,
+            user=request.user,
             date=serializer.validated_data["date"],
             defaults=serializer.validated_data,
         )
 
-        return Response(
-            {"detail": "Created" if created else "Updated"},
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
-        )
+        response_serializer = DailyMacronutrientGoalResponseSerializer(instance)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -76,9 +75,7 @@ class DailyMacronutrientGoalView(APIView):
         query_serializer.is_valid(raise_exception=True)
 
         response_serializer = DailyMacronutrientGoalResponseSerializer(
-            get_object_or_404(
-                DailyMacronutrientGoal, user_id=request.user, date=query_serializer.validated_data["date"]
-            )
+            get_object_or_404(DailyMacronutrientGoal, user=request.user, date=query_serializer.validated_data["date"])
         )
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
@@ -86,52 +83,33 @@ class DailyMacronutrientGoalView(APIView):
 class WeightGoalView(APIView):
 
     @swagger_auto_schema(
-        request_body=WeightGoalSerializer,
+        request_body=WeightGoalRequestSerializer,
         responses={
-            "201": openapi.Response(
-                description="Weight goal created",
-                schema=WeightGoalSerializer,
+            200: openapi.Response(
+                description="Weight goal successfully created or updated.",
+                schema=WeightGoalResponseSerializer,
             ),
-            "400": "Invalid input",
+            400: "Invalid input data.",
         },
     )
-    def post(self, request):
+    def put(self, request):
         """
-        Create a weight goal for the authenticated user.
+        Create or update the user's weight goal.
         """
-        serializer = WeightGoalSerializer(data=request.data, context={"user": request.user})
+        serializer = WeightGoalRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        goal, created = WeightGoal.objects.update_or_create(
+            user=request.user,
+            defaults=serializer.validated_data,
+        )
+
+        response_serializer = WeightGoalResponseSerializer(goal)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def get(self, request):
         """
         Retrieve the user's current weight goal.
         """
-        goal = get_object_or_404(WeightGoal, user_id=request.user)
-        serializer = WeightGoalSerializer(goal)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
-        request_body=WeightGoalSerializer,
-        responses={
-            200: openapi.Response(
-                description="Weight goal successfully updated.",
-                schema=WeightGoalSerializer,
-            ),
-            400: "Invalid input data.",
-        },
-    )
-    def patch(self, request):
-        """
-        Partially update the user's existing weight goal.
-        """
-        serializer = WeightGoalSerializer(
-            get_object_or_404(WeightGoal, user_id=request.user),
-            data=request.data,
-            partial=True,
-            context={"user": request.user},
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer = WeightGoalResponseSerializer(get_object_or_404(WeightGoal, user=request.user))
         return Response(serializer.data, status=status.HTTP_200_OK)

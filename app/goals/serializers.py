@@ -1,4 +1,9 @@
-from rest_framework.serializers import DateField, ModelSerializer, Serializer
+from rest_framework.serializers import (
+    DateField,
+    DecimalField,
+    ModelSerializer,
+    Serializer,
+)
 
 from goals.models import DailyMacronutrientGoal, WeightGoal
 
@@ -25,23 +30,36 @@ class DailyMacronutrientGoalQuerySerializer(Serializer):
     date = DateField()
 
 
-class DailyMacronutrientGoalResponseSerializer(ModelSerializer):
+class DailyMacronutrientGoalResponseSerializer(Serializer):
     """
     Serializer to output the daily macronutrient goal data for a user.
+    Pure output serializer - no validation or saving logic.
+    """
+
+    date = DateField()
+    goal_calories = DecimalField(max_digits=6, decimal_places=2)
+    goal_protein = DecimalField(max_digits=6, decimal_places=2)
+    goal_carbs = DecimalField(max_digits=6, decimal_places=2)
+    goal_fats = DecimalField(max_digits=6, decimal_places=2)
+
+
+class WeightGoalRequestSerializer(ModelSerializer):
+    """
+    Serializer for creating and updating weight goals.
+
+    Does not allow setting the `user` via the request body, this is handled via context on the server.
     """
 
     class Meta:
-        model = DailyMacronutrientGoal
-        fields = ("date", *GOAL_COLUMNS)
-        read_only_fields = fields
+        model = WeightGoal
+        fields = ("goal_date", "goal_weight_kg")
 
 
-class WeightGoalSerializer(ModelSerializer):
+class WeightGoalResponseSerializer(ModelSerializer):
+    """
+    Serializer for outputting weight goal data.
+    """
+
     class Meta:
         model = WeightGoal
-        fields = ("id", "goal_date", "goal_weight_kg")
-        read_only_fields = ("id",)
-
-    def create(self, validated_data):
-        validated_data["user_id"] = self.context["user"]
-        return super().create(validated_data)
+        fields = ("goal_date", "goal_weight_kg")

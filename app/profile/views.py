@@ -1,6 +1,4 @@
-from django.http import Http404
 from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
@@ -12,13 +10,6 @@ from .serializers import (
     ProfileRequestSerializer,
     ProfileResponseSerializer,
 )
-
-
-def _get_profile_for_user(user):
-    try:
-        return Profile.objects.get(user_id=user)
-    except Profile.DoesNotExist:
-        raise Http404
 
 
 class ProfileView(APIView):
@@ -37,7 +28,7 @@ class ProfileView(APIView):
         responses={200: ProfileResponseSerializer, 404: "Profile not found"},
     )
     def get(self, request):
-        profile = get_object_or_404(Profile, user_id=request.user)
+        profile = get_object_or_404(Profile, user=request.user)
         return Response(ProfileResponseSerializer(profile).data)
 
     @swagger_auto_schema(
@@ -45,7 +36,7 @@ class ProfileView(APIView):
         responses={200: ProfileResponseSerializer, 400: "Bad Request"},
     )
     def patch(self, request):
-        profile = get_object_or_404(Profile, user_id=request.user)
+        profile = get_object_or_404(Profile, user=request.user)
         serializer = ProfileRequestSerializer(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
@@ -57,6 +48,6 @@ class ProfileView(APIView):
         responses={204: "Successfully deleted"},
     )
     def delete(self, request):
-        profile = get_object_or_404(Profile, user_id=request.user)
+        profile = get_object_or_404(Profile, user=request.user)
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

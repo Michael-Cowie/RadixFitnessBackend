@@ -10,7 +10,7 @@ class FoodEntryTrackingTestCase(TestCase):
         cls.user = User.objects.create(id=1, username="Test User")
         cls.test_data = [
             {
-                "user_id": cls.user,
+                "user": cls.user,
                 "date": "2024-09-01",
                 "food_name": "Test Food 1",
                 "total_calories": 500,
@@ -20,7 +20,7 @@ class FoodEntryTrackingTestCase(TestCase):
                 "food_weight": 200,
             },
             {
-                "user_id": cls.user,
+                "user": cls.user,
                 "date": "2024-09-01",
                 "food_name": "Test Food 2",
                 "total_calories": 600,
@@ -35,9 +35,9 @@ class FoodEntryTrackingTestCase(TestCase):
         self.food_entries = [FoodEntry.objects.create(**entry) for entry in self.test_data]
 
     def test_food_entry_creation(self):
-        entries = FoodEntry.objects.filter(user_id=self.user, date="2024-09-01")
+        entries = FoodEntry.objects.filter(user=self.user, date="2024-09-01")
         for entry, data in zip(entries, self.test_data):
-            self.assertEqual(entry.user_id, data["user_id"])
+            self.assertEqual(entry.user, data["user"])
             self.assertEqual(entry.date.isoformat(), data["date"])
             self.assertEqual(entry.food_name, data["food_name"])
             self.assertEqual(entry.total_calories, data["total_calories"])

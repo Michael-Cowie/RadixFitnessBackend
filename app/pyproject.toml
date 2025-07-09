@@ -3,3 +3,9 @@ profile = "black"
 
 [tool.black]
 line-length = 120
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "backend.settings"
+python_files = ["test_*.py"]
+addopts = "--tb=short --strict-markers"
+testpaths = "."

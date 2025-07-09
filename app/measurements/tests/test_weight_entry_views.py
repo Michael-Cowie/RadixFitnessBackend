@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from django.contrib.auth.models import User
@@ -8,209 +7,134 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ..models import WeightEntry
+from ..urls import WEIGHT_HISTORY_NAME, WEIGHT_MEASUREMENTS_NAME
 
 
-class WeightEntryTests(TestCase):
+def date_as_datetime(date: str):
+    return datetime.strptime(date, "%Y-%m-%d").date()
 
-    def date_as_datetime(self, date):
-        return datetime.strptime(date, "%Y-%m-%d").date()
 
-    def setUp(self):
-        self.content_type = "application/json"
-        self.user = User.objects.get(id=1)
-
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.user)
-
+class BaseWeightEntryTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        user = User.objects.create(id=1, username="Test User")
+        cls.user = User.objects.create_user(username="testuser", password="testpass")
+        cls.initial_entries = [
+            ("2024-01-01", 70),
+            ("2024-01-08", 71),
+            ("2024-01-13", 72),
+            ("2024-01-20", 73),
+            ("2024-01-27", 74),
+            ("2024-02-01", 163),
+            ("2024-02-08", 167.5),
+            ("2024-02-15", 171.33),
+        ]
 
-        def _create_weight_tracking_entry(date, weight):
-            return WeightEntry.objects.create(date=date, weight_kg=weight, user_id=user)
-
-        _create_weight_tracking_entry("2024-01-01", 70)
-        _create_weight_tracking_entry("2024-01-08", 71)
-        _create_weight_tracking_entry("2024-01-13", 72)
-        _create_weight_tracking_entry("2024-01-20", 73)
-        _create_weight_tracking_entry("2024-01-27", 74)
-        _create_weight_tracking_entry("2024-02-01", 163)
-        _create_weight_tracking_entry("2024-02-08", 167.5)
-        _create_weight_tracking_entry("2024-02-15", 171.33)
-
-
-class AllWeightsView(WeightEntryTests):
+        for date, weight in cls.initial_entries:
+            WeightEntry.objects.create(user=cls.user, date=date, weight_kg=weight)
 
     def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        self.user = User.objects.get(username="testuser")
+
+
+class AllWeightsViewTest(BaseWeightEntryTestCase):
+    def setUp(self):
         super().setUp()
-        self.test_url = reverse("all_weights")
-        self.data = self.client.get(self.test_url).data
+        self.url = reverse(WEIGHT_HISTORY_NAME)
+        self.response = self.client.get(self.url)
+        self.data = self.response.data
 
-    def test_correct_response_data(self):
-        """
-        Verify that the View has returned the correct data for the test user.
-        """
-        for weight in self.data:
-            expected_weight = WeightEntry.objects.get(id=weight["id"])
-            self.assertEqual(self.date_as_datetime(weight["date"]), expected_weight.date)
-            self.assertEqual(weight["weight_kg"], expected_weight.weight_kg)
-            self.assertEqual(weight["user_id"], expected_weight.user_id.id)
+    def test_returns_correct_data(self):
+        """Should return all weight entries for the authenticated user"""
+        for entry in self.data:
+            with self.subTest(date=entry["date"]):
+                obj = WeightEntry.objects.get(user_id=entry["user"], date=entry["date"])
+                self.assertEqual(entry["weight_kg"], obj.weight_kg)
+                self.assertEqual(entry["user"], obj.user.id)
 
-    def test_correct_number_of_expected_users(self):
-        """
-        Verify that the response data is the expected length.
-        """
-        number_of_weights = WeightEntry.objects.filter().count()
-        number_of_response_weights = len(self.data)
-        self.assertEqual(number_of_weights, number_of_response_weights)
+    def test_returns_correct_number_of_entries(self):
+        """Should return the expected number of weight entries"""
+        self.assertEqual(len(self.data), len(self.initial_entries))
 
-    def test_request_for_empty_user(self):
-        """
-        Verify that the View correctly handles a user with no weight entries.
-        """
-        new_user = User.objects.create(id=2, username="new user username")
+    def test_empty_response_for_new_user(self):
+        """Should return an empty list for a user with no weight entries"""
+        new_user = User.objects.create_user(username="emptyuser", password="test")
+        self.client.force_authenticate(user=new_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_dates_returned_in_descending_order(self):
+        """Dates should be returned in descending order (most recent first)"""
+        new_user = User.objects.create_user(username="ordereduser", password="test")
         self.client.force_authenticate(user=new_user)
 
-        data = self.client.get(self.test_url).data
-        self.assertEqual(len(data), 0)
-
-    def test_dates_return_in_descending_order(self):
-        """
-        Verify that the measurements are returned in descending order where the most recent date will be at index 0.
-        """
-        new_user = User.objects.create(id=2, username="new user username")
-        self.client.force_authenticate(user=new_user)
-
-        def _create_weight_tracking_entry(date, weight):
-            return WeightEntry.objects.create(date=date, weight_kg=weight, user_id=new_user)
-
-        expected_list = [
-            "2024-12-25",
-            "2024-12-20",
-            "2024-09-17",
-            "2024-08-16",
-            "2024-05-01",
-            "2024-01-02",
+        unsorted_dates = [
             "2024-01-01",
+            "2024-01-02",
+            "2024-05-01",
+            "2024-08-16",
+            "2024-09-17",
+            "2024-12-20",
+            "2024-12-25",
             "2023-12-25",
             "2023-05-18",
         ]
 
-        for position in [
-            8,
-            3,
-            2,
-            7,
-            0,
-            4,
-            1,
-            5,
-            6,
-        ]:  # Add to database in a random order.
-            _create_weight_tracking_entry(expected_list[position], 50 + position)
+        for i, date in enumerate(reversed(unsorted_dates)):  # Insert in reverse order
+            WeightEntry.objects.create(user=new_user, date=date, weight_kg=50 + i)
 
-        returned_data = self.client.get(self.test_url).data
+        response = self.client.get(self.url)
+        response_dates = [entry["date"] for entry in response.data]
 
-        for expected_position in range(len(returned_data)):
-            self.assertEqual(
-                returned_data[expected_position]["date"],
-                expected_list[expected_position],
-            )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_dates, sorted(unsorted_dates, reverse=True))
 
 
-class WeightsViewTest(WeightEntryTests):
-
+class WeightMeasurementTest(BaseWeightEntryTestCase):
     def setUp(self):
         super().setUp()
-        self.test_url = reverse("weights")
-
+        self.url = reverse(WEIGHT_MEASUREMENTS_NAME)
         self.date = "2000-01-01"
-        self.weight = 200.00
-        self.data = json.dumps({"date": self.date, "weight_kg": self.weight})
+        self.weight = 200.0
+        self.payload = {"date": self.date, "weight_kg": self.weight}
 
-    def test_creating_a_weight(self):
-        # 1. Send a POST to create the weight
-        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response_data = response.data
-        response_id = response_data["id"]
+    def test_can_create_weight_entry(self):
+        """Should create a new weight entry"""
+        response = self.client.put(self.url, data=self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["date"], self.date)
+        self.assertEqual(response.data["weight_kg"], self.weight)
 
-        # 2. Validate it was populated in the model with the correct data inside the http body
-        created_weight = WeightEntry.objects.get(id=response_id)
+    def test_can_update_existing_weight(self):
+        """Should update an existing weight entry"""
+        self.client.put(self.url, data=self.payload, format="json")
 
-        self.assertEqual(self.date_as_datetime(self.date), created_weight.date)
-        self.assertEqual(self.weight, created_weight.weight_kg)
-        self.assertEqual(self.user, created_weight.user_id)
+        updated_weight = 230
+        response = self.client.put(self.url, data={"date": self.date, "weight_kg": updated_weight}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_creating_two_weights_same_day(self):
-        # 1. Send a POST to create the weight
-        self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+        updated_entry = WeightEntry.objects.get(user=self.user, date=self.date)
+        self.assertEqual(updated_entry.weight_kg, updated_weight)
 
-        # 2. Send a POST to create a same on the same day
-        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_can_update_notes_field(self):
+        """Should update notes for an existing weight entry"""
+        initial_notes = "Initial note"
+        self.client.put(self.url, data={**self.payload, "notes": initial_notes}, format="json")
 
-    def test_updating_a_weight(self):
-        # 1. Send a POST to create the weight
-        self.client.post(self.test_url, data=self.data, content_type=self.content_type)
-
-        # 2. Send a PATCH to update the weight and unit
-        new_weight = 230
-        new_data = json.dumps({"date": self.date, "weight_kg": new_weight})
-        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
-
-        # 3. Verify that the weight has been updated in the model
-        weight_id = response.data["id"]
-        model_weight = WeightEntry.objects.get(id=weight_id)
+        new_notes = "Updated note"
+        response = self.client.put(self.url, data={**self.payload, "notes": new_notes}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(new_weight, int(model_weight.weight_kg))
+        self.assertEqual(response.data["notes"], new_notes)
 
-    def test_partially_updating_a_weight(self):
-        # 1. Send a POST to create the weight
-        self.client.post(self.test_url, data=self.data, content_type=self.content_type)
+    def test_can_delete_weight_entry(self):
+        """Should delete an existing weight entry"""
+        self.client.put(self.url, data=self.payload, format="json")
 
-        # 2. Send a PATCH to update only the weight
-        new_weight = 999
-        new_data = json.dumps({"date": self.date, "weight_kg": new_weight})
-
-        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
-
-        # 3. Verify that the weight has been updated in the model and the unit remains unchanged
-        weight_id = response.data["id"]
-        model_weight = WeightEntry.objects.get(id=weight_id)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(new_weight, int(model_weight.weight_kg))
-
-    def test_updating_notes(self):
-        # 1. Send a POST to create the weight
-        data = json.dumps({"date": self.date, "weight_kg": self.weight, "notes": "My initial notes"})
-
-        self.client.post(self.test_url, data=data, content_type=self.content_type)
-
-        # 2. Send a PATCH to update only the notes
-        new_notes = "My new notes"
-        new_data = json.dumps({"date": self.date, "notes": new_notes})
-
-        response = self.client.patch(self.test_url, data=new_data, content_type=self.content_type)
-
-        # 3. Verify that the notes has been updated in the model and the unit remains unchanged
-        weight_id = response.data["id"]
-        model_weight = WeightEntry.objects.get(id=weight_id)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(new_notes, model_weight.notes)
-
-    def test_deleting_a_weight(self):
-        # 1. Send a POST to create the weight
-        response = self.client.post(self.test_url, data=self.data, content_type=self.content_type)
-        weight_id = response.data["id"]
-
-        # 2. Send a DELETE to delete the weight
-        response = self.client.delete(self.test_url, data=self.data, content_type=self.content_type)
+        response = self.client.delete(self.url, data=self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # 5. Verify that the weight has been deleted.
-        with self.assertRaises(WeightEntry.DoesNotExist):
-            WeightEntry.objects.get(id=weight_id)
+        exists = WeightEntry.objects.filter(user=self.user, date=self.date).exists()
+        self.assertFalse(exists)

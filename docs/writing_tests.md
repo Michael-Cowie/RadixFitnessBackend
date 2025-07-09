@@ -1,8 +1,18 @@
-<div align="center">
-    <h1> Testing </h1>
-</div>
+## Test File structure
 
-## Test structure
+The generated app will provide a `tests.py`, however, I much prefer to change the structure to the following,
+
+```commandline
+app_example/
+  /tests/
+    __init__.py
+    test_models.py
+    test_views.py
+```
+
+In order to not bloat the single file with every test type.
+
+## Test Code Structure
 
 Test cases will typically have a format such as this,
 
@@ -28,7 +38,23 @@ class YourTestClass(TestCase):
         self.assertTrue(False)
 ```
 
-## Running all tests
+## Running Tests Using PyCharm
+
+The dependency `pytest-django` is used to easily configure and run Django tests. This dependency is very useful as without it running tests directly using PyCharm is not possible without `pytest-django` as this dependency is responsible for calling `django.setup()` automatically which registering the apps.
+
+<div align="center">
+    <img src="./images/pytest_setup.png">
+</div>
+
+<div align="center">
+    <img src="./images/pytest_running_test.png">
+</div>
+
+
+The configuration for `pytest-django` is done in `pyproject.toml`
+
+
+## Running All Tests Using CLI
 
 To execute all tests, the following command can be used.
 
@@ -43,38 +69,8 @@ If your tests are independent, on a multiprocessor machine you can significantly
 parallel. The use of --parallel auto below runs one test process per available core. The auto is optional, and you can 
 also specify a particular number of cores to use.
 
-## Speeding up test execution time.
+To speed up test execution, tests can be ran in paralle.
 
 ```commandline
 python manage.py test --parallel auto
 ```
-
-## Running an individual test
-
-If you want to run a subset of your tests you can do so by specifying the full dot path to the package(s), module,
-`TestCase` subclass or method, e.g.
-
-```commandline
-# Run all tests inside the tests file 
-python manage.py test weighttracking.tests.test_models
-
-# Run all tests for the given class
-python manage.py test weighttracking.tests.test_models.WeightTrackingModelTest
-
-# Run a specific test inside the class
-python manage.py test weighttracking.tests.test_models.WeightTrackingModelTest.test_weight_tracking_model_creation
-```
-
-## Test structure
-
-The generated app will provide a `tests.py`, however, I much prefer to change the structure to the following,
-
-```commandline
-app_example/
-  /tests/
-    __init__.py
-    test_models.py
-    test_views.py
-```
-
-In order to not bloat the single file with every test type.

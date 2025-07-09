@@ -4,7 +4,7 @@ from .models import WeightEntry
 
 
 class WeightEntryAdmin(admin.ModelAdmin):
-    list_display = ("id", "date", "weight_kg", "user_id")
+    list_display = ("id", "date", "weight_kg", "user")
 
 
 admin.site.register(WeightEntry, WeightEntryAdmin)
