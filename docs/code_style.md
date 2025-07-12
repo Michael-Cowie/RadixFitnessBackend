@@ -125,6 +125,23 @@ user, created = User.objects.update_or_create(
 )
 ```
 
+The `update_or_create()` treats every positional/keyword argument **except** `defaults` as part of the look up that decides whether a row already exists.
+
+In the following example we want to search for the user `request.user`, which is the primary key and then create or update
+the columns specified under `defaults`. Any fields in `defaults` are applied as an atomic `UPDATE` if the row exists or used to populate a new row if it doesn't.
+
+```python
+instance, created = Profile.objects.update_or_create(
+    user=request.user,                       #  <-- lookup key(s)
+    defaults={
+        "name": serializer.validated_data["name"],
+        "measurement_system": serializer.validated_data["measurement_system"],
+    },                                       #  <-- fields to update / set
+)
+```
+
+This is generally shortened to pass `serializer.validated_data` using the request serializer, demonstrated previously with `UserSerializer`.
+
 #### Combined Usage
 
 The purpose of passing both an instance with data, is to **update existing instances with validated data**. This will primarily to be used for PUT/PATCH for resource updating. For `patch`, you would need to pass `partial=True` to the serializer.
@@ -247,6 +264,14 @@ class ProfileResponseSerializer(serializers.ModelSerializer):
 ```
 
 This will prevent accidental misuse for a response based serializer from accidentally changing data in the model.
+
+When you declare fields as `read_only_fields`, those fields are not allowed in `input` data. Meaning,
+
+- The serializer ignores them during `is_valid()`
+- They are excluded them validation
+- They are not included in `.invalidated_data`
+
+They are still included in the output via `.data`, but RDF treats them if they don't exist for writes such as `create()` or `update()` calls. This makes it a perfect use for response serializers.
 
 ### ModelSerializer - GET
 

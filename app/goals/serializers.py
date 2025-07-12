@@ -1,9 +1,4 @@
-from rest_framework.serializers import (
-    DateField,
-    DecimalField,
-    ModelSerializer,
-    Serializer,
-)
+from rest_framework.serializers import DateField, ModelSerializer, Serializer
 
 from goals.models import DailyMacronutrientGoal, WeightGoal
 
