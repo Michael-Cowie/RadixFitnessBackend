@@ -51,6 +51,10 @@ A local development server can be run by retrieving the `.env` file that contain
  <img src="./images/dot_env.png"/>
 </div>
 
+<div align="center">
+ <img src="./images/run_server_community.png"/>
+</div>
+
 ### Remote Server
 
 When executing the server remotely, the environment variables will be injected. Here, GitHub action secrets is configured to allow for environment variables to be set while keeping them hidden.
