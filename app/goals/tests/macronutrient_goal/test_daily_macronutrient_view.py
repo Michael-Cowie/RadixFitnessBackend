@@ -32,10 +32,10 @@ class DailyIntakeTrackingViewTests(APITestCase):
         self.test_data = {
             "user": self.user,
             "date": self.test_data_date,
-            "goal_calories": "2000.00",
-            "goal_protein": "150.00",
-            "goal_carbs": "250.00",
-            "goal_fats": "70.00",
+            "goal_calories": 2000.00,
+            "goal_protein": 150.00,
+            "goal_carbs": 250.00,
+            "goal_fats": 70.00,
         }
         DailyMacronutrientGoal.objects.create(**self.test_data)
 

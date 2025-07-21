@@ -67,27 +67,6 @@ class DailyIntakeTrackingTest(TestCase):
             )
             duplicate_entry.full_clean()
 
-    def test_max_value_validation(self):
-        """
-        Test that a ValidationError is raised when a value exceeds its maximum limit.
-
-        This test checks the validation logic of the model, particularly ensuring that
-        if the goal_calories field exceeds the maximum allowed value of 5000, a
-        ValidationError is raised. This test uses the full_clean() method to manually
-        trigger model validation.
-        """
-        daily_intake = DailyMacronutrientGoal(
-            user=self.user,
-            date=date.today(),
-            goal_calories=6000,
-            goal_protein=200,
-            goal_carbs=350,
-            goal_fats=80,
-        )
-
-        with self.assertRaises(ValidationError):
-            daily_intake.full_clean()
-
     def test_min_value_validation(self):
         """
         Test that a ValidationError is raised when a value is below its minimum limit.
@@ -123,11 +102,11 @@ class DailyIntakeTrackingTest(TestCase):
             goal_fats=80,
         )
         expected_str = f"""
-        On {daily_intake.date} you have have the following goals,
+        On {daily_intake.date} you have the following goals,
 
-        - Goal calories {daily_intake.goal_calories}kcal
-        - Goal protein {daily_intake.goal_protein}g
-        - Goal carbs {daily_intake.goal_carbs}g
-        - Goal fats {daily_intake.goal_fats}g
+        - Goal calories - {daily_intake.goal_calories} kcal
+        - Goal protein - {daily_intake.goal_protein} g
+        - Goal carbs - {daily_intake.goal_carbs} g
+        - Goal fats - {daily_intake.goal_fats} g
 """
         self.assertEqual(str(daily_intake).strip(), expected_str.strip())

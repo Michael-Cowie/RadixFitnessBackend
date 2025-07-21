@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -12,39 +12,22 @@ class DailyMacronutrientGoal(models.Model):
         ordering = ["-date"]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     date = models.DateField()
 
-    goal_calories = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(5000)],
-    )
-    goal_protein = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(5000)],
-    )
-    goal_carbs = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(5000)],
-    )
-    goal_fats = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(5000)],
-    )
+    goal_calories = models.FloatField(validators=[MinValueValidator(0)])
+    goal_protein = models.FloatField(validators=[MinValueValidator(0)])
+    goal_carbs = models.FloatField(validators=[MinValueValidator(0)])
+    goal_fats = models.FloatField(validators=[MinValueValidator(0)])
 
     def __str__(self):
         return f"""
-        On { self.date} you have have the following goals,
+        On {self.date} you have the following goals,
 
-        - Goal calories { self.goal_calories }kcal
-        - Goal protein { self.goal_protein }g
-        - Goal carbs { self.goal_carbs }g
-        - Goal fats { self.goal_fats }g
-"""
+        - Goal calories - {self.goal_calories} kcal
+        - Goal protein - {self.goal_protein} g
+        - Goal carbs - {self.goal_carbs} g
+        - Goal fats - {self.goal_fats} g
+        """
 
 
 class WeightGoal(models.Model):
