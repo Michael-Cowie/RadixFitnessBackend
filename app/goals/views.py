@@ -24,10 +24,6 @@ class DailyMacronutrientGoalView(APIView):
                 description="Successfully updated the food tracking entry",
                 schema=DailyMacronutrientGoalResponseSerializer,
             ),
-            201: openapi.Response(
-                description="Successfully created a food tracking entry",
-                schema=DailyMacronutrientGoalResponseSerializer,
-            ),
             400: "Invalid data for food tracking entry",
         },
     )
