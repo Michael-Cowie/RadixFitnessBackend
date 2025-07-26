@@ -1,0 +1,4 @@
+app = "radix-fitness-api"
+
+[build]
+  context = "app"
