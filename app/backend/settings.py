@@ -163,6 +163,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Allow all requests from here to work without error
-CORS_ORIGIN_WHITELIST = os.getenv("CORS_ORIGIN_WHITELIST", "").split(",")
+CORS_ORIGIN_WHITELIST = django_configs.get("Django", "CORS_ORIGIN_WHITELIST").split(",")
 
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+CSRF_TRUSTED_ORIGINS = django_configs.get("Django", "CSRF_TRUSTED_ORIGINS").split(",")
