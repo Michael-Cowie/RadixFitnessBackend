@@ -11,6 +11,10 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
+from backend.configurations.setup_python_path import setup_python_path
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+
+setup_python_path()
 
 application = get_wsgi_application()

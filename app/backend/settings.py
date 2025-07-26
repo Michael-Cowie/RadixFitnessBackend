@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
 from configurations.django_config_parser import django_configs
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -105,16 +106,16 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# If DATABASE_URL is set, use it. Otherwise, use defaults.ini
 DATABASES = {
-    "default": {
+    "default": dj_database_url.config()
+    or {
         "ENGINE": django_configs.get("Database", "SQL_ENGINE"),
         "NAME": django_configs.get("Database", "SQL_DATABASE"),
-        "USER": django_configs.get("Database", "SQL_USER"),
-        "PASSWORD": django_configs.get("Database", "SQL_PASSWORD"),
-        "HOST": django_configs.get("Database", "SQL_HOST"),
-        "PORT": django_configs.get("Database", "SQL_PORT"),
+        "USER": django_configs.get("Database", "SQL_USER", fallback=""),
+        "PASSWORD": django_configs.get("Database", "SQL_PASSWORD", fallback=""),
+        "HOST": django_configs.get("Database", "SQL_HOST", fallback=""),
+        "PORT": django_configs.get("Database", "SQL_PORT", fallback=""),
     }
 }
 
@@ -162,10 +163,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Allow all requests from here to work without error
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",  # React
-    "http://localhost:5173",  # Vite
-    "http://localhost:1337",  # Nginx
-]
+CORS_ORIGIN_WHITELIST = os.getenv("CORS_ORIGIN_WHITELIST", "").split(",")
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
