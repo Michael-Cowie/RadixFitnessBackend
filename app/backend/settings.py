@@ -112,10 +112,10 @@ DATABASES = {
     or {
         "ENGINE": django_configs.get("Database", "SQL_ENGINE"),
         "NAME": django_configs.get("Database", "SQL_DATABASE"),
-        "USER": django_configs.get("Database", "SQL_USER", fallback=""),
-        "PASSWORD": django_configs.get("Database", "SQL_PASSWORD", fallback=""),
-        "HOST": django_configs.get("Database", "SQL_HOST", fallback=""),
-        "PORT": django_configs.get("Database", "SQL_PORT", fallback=""),
+        "USER": django_configs.get("Database", "SQL_USER"),
+        "PASSWORD": django_configs.get("Database", "SQL_PASSWORD"),
+        "HOST": django_configs.get("Database", "SQL_HOST"),
+        "PORT": django_configs.get("Database", "SQL_PORT"),
     }
 }
 
