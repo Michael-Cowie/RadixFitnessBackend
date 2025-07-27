@@ -9,10 +9,10 @@ run them, and the common problems you might run into.
 
 There are several commands which you will use to interact with migrations and Django’s handling of database schema:
 
-1. `makemigrations`, which is responsible for creating new migrations based on the changes you have made to your models.
-2. `migrate`, which is responsible for applying and unapplying migrations.
-3. `sqlmigrate`, which displays the SQL statements for a migration.
-4. `showmigrations`, which lists a project’s migrations and their status.
+1. `makemigrations` - Responsible for creating new migrations based on the changes you have made to your models.
+2. `migrate` - Responsible for applying and unapplying migrations.
+3. `sqlmigrate` - Displays the SQL statements for a migration.
+4. `showmigrations` - Lists a project’s migrations and their status.
 
 You should think of migrations as a version control system for your database schema. `makemigrations` is responsible 
 for packaging up your model changes into individual migration files - analogous to commits - and `migrate` is responsible 
@@ -44,3 +44,9 @@ To commit these changes to the database, the two commands need to be ran.
 python manage.py makemigrations
 python manage.py migrate
 ```
+
+The database where the migrations will be applied to is the database located at the `DATABASE_URL` environment variable. This means we will need to run the `migrate` script with PyCharm to find the environment variable through the `.env` file.
+
+<div align="center">
+    <img src="./images/pycharm_migrate_setup.png">
+</div>
