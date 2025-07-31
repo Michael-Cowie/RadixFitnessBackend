@@ -53,14 +53,12 @@ class FoodSearchView(APIView):
         if not search_food:
             return Response({"error": "Query parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if food := FoodDataCentralService.get_nutrient_for_single_food(search_food):
-            serializer = FoodSearchResultSerializer(food)
-
+        if search_results := FoodDataCentralService.get_foods_by_query_name(search_food):
             response_data = {
                 "food_weight": 100,
                 "food_unit": "G",
                 "search_query": search_food,
-                "food_nutrient": serializer.data,
+                "search_results": [FoodSearchResultSerializer(food).data for food in search_results],
             }
             return Response(response_data, status=status.HTTP_200_OK)
 

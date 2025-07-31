@@ -3,6 +3,8 @@ from configurations.django_config_parser import django_configs
 
 FOODDATA_CENTRAL_API_KEY = django_configs.get("FoodData Central", "FOODDATA_CENTRAL_API_KEY")
 
+NUMBER_OF_FOODS_TO_RETURN = 20
+
 
 class FoodDataCentralService:
     """
@@ -18,7 +20,7 @@ class FoodDataCentralService:
     BASE_URL = "https://api.nal.usda.gov/fdc/v1/foods"
 
     @staticmethod
-    def get_nutrient_for_single_food(query):
+    def get_foods_by_query_name(query):
         """
         The FoodData Central API offers five types of food groups,
 
@@ -33,11 +35,9 @@ class FoodDataCentralService:
             "query": query,
             "api_key": FOODDATA_CENTRAL_API_KEY,
             "dataType": ["SR Legacy"],
-            "pageSize": 1,
+            "pageSize": NUMBER_OF_FOODS_TO_RETURN,
             "pageNumber": 1,
         }
         response = requests.get(url, params=params)
         response.raise_for_status()
-        data = response.json()
-        foods = data.get("foods", [])
-        return foods[0] if foods else None
+        return response.json().get("foods", [])
