@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 alpha = RegexValidator(
-    regex=r"^[a-zA-Z]+$",
+    regex=r"^[a-zA-Z ]+$",
     message="Only alphabetic characters are allowed.",
 )
 
