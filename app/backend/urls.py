@@ -48,6 +48,7 @@ urlpatterns = [
     path("api/v1/intake/", include("intake.urls")),
     path("api/v1/goals/", include("goals.urls")),
     path("api/v1/foods/", include("fooddata_central_service.urls")),
+    path("api/v1/analytics/", include("analytics.macronutrients.urls")),
 ]
 
 
