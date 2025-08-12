@@ -47,13 +47,17 @@ class MacronutrientAnalyticsView(APIView):
         end = query.validated_data["end"]
 
         entries_qs = FoodEntry.objects.filter(user=request.user, date__range=(start, end))
-        days_with_logs = entries_qs.values("date").distinct().count()
+        entry_dates = entries_qs.values("date").distinct()
+        days_with_logs = entry_dates.count()
 
         if days_with_logs == 0:
             payload = _default_payload(start, end)
             return Response(AnalyticsResponseSerializer(payload).data, status=status.HTTP_200_OK)
 
-        goals_qs = DailyMacronutrientGoal.objects.filter(user=request.user, date__range=(start, end))
+        goals_qs = DailyMacronutrientGoal.objects.filter(
+            user=request.user,
+            date__in=entry_dates,
+        )
 
         consumed_totals = entries_qs.aggregate(
             calories=Sum("total_calories"),
