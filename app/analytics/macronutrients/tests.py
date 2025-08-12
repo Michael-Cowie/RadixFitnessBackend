@@ -116,10 +116,11 @@ class MacronutrientAnalyticsViewTests(TestCase):
         total_carbs_consumed = day0_food1_carbs + day0_food2_carbs + day2_food_carbs
         total_fats_consumed = day0_food1_fats + day0_food2_fats + day2_food_fats
 
-        total_cals_goal = goal_day0_cals + goal_day2_cals + goal_day4_cals
-        total_protein_goal = goal_day0_protein + goal_day2_protein + goal_day4_protein
-        total_carbs_goal = goal_day0_carbs + goal_day2_carbs + goal_day4_carbs
-        total_fats_goal = goal_day0_fats + goal_day2_fats + goal_day4_fats
+        # Do not include goal_day_4 in these calculations because they have no entries on the associated date.
+        total_cals_goal = goal_day0_cals + goal_day2_cals
+        total_protein_goal = goal_day0_protein + goal_day2_protein
+        total_carbs_goal = goal_day0_carbs + goal_day2_carbs
+        total_fats_goal = goal_day0_fats + goal_day2_fats
 
         resp = self.client.get(self.url, {"start": self.start.isoformat(), "end": self.end.isoformat()})
         self.assertEqual(resp.status_code, 200)
