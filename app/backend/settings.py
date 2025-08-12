@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     # My Apps
+    "analytics",
     "firebase",
     "fooddata_central_service",
     "goals",
